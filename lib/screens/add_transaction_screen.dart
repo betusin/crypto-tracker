@@ -1,0 +1,210 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../models/transaction_model.dart';
+import '../providers/transaction_provider.dart';
+import '../services/price_service.dart';
+
+class AddTransactionScreen extends StatefulWidget {
+  const AddTransactionScreen({super.key});
+
+  @override
+  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+}
+
+class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  final _formKey = GlobalKey<FormState>();
+  TransactionType _type = TransactionType.buy;
+  String _cryptoId = 'bitcoin';
+  final _amountController = TextEditingController();
+  final _priceController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
+  final PriceService _priceService = PriceService();
+  bool _isFetchingPrice = false;
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchPrice() async {
+    setState(() {
+      _isFetchingPrice = true;
+    });
+    try {
+      final price = await _priceService.fetchPrice(_cryptoId);
+      _priceController.text = price.toString();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to fetch price: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingPrice = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2010),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  void _saveTransaction() {
+    if (_formKey.currentState!.validate()) {
+      final transaction = TransactionModel(
+        type: _type,
+        cryptoId: _cryptoId,
+        amount: double.parse(_amountController.text),
+        pricePerUnit: double.parse(_priceController.text),
+        date: _selectedDate,
+      );
+
+      Provider.of<TransactionProvider>(context, listen: false)
+          .addTransaction(transaction);
+
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Transaction'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              // Transaction Type
+              Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<TransactionType>(
+                      title: const Text('Buy'),
+                      value: TransactionType.buy,
+                      groupValue: _type,
+                      onChanged: (TransactionType? value) {
+                        setState(() {
+                          _type = value!;
+                        });
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<TransactionType>(
+                      title: const Text('Sell'),
+                      value: TransactionType.sell,
+                      groupValue: _type,
+                      onChanged: (TransactionType? value) {
+                        setState(() {
+                          _type = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              // Crypto Selection
+              DropdownButtonFormField<String>(
+                value: _cryptoId,
+                decoration: const InputDecoration(labelText: 'Cryptocurrency'),
+                items: const [
+                  DropdownMenuItem(value: 'bitcoin', child: Text('Bitcoin (BTC)')),
+                  DropdownMenuItem(value: 'ethereum', child: Text('Ethereum (ETH)')),
+                ],
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _cryptoId = newValue!;
+                  });
+                },
+              ),
+
+              // Amount
+              TextFormField(
+                controller: _amountController,
+                decoration: const InputDecoration(labelText: 'Amount'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an amount';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+
+              // Price
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _priceController,
+                      decoration: const InputDecoration(labelText: 'Price per Unit (USD)'),
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a price';
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Please enter a valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: _isFetchingPrice
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.download),
+                    onPressed: _isFetchingPrice ? null : _fetchPrice,
+                    tooltip: 'Fetch Current Price',
+                  ),
+                ],
+              ),
+
+              // Date
+              ListTile(
+                title: Text('Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () => _selectDate(context),
+              ),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: _saveTransaction,
+                child: const Text('Save Transaction'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
