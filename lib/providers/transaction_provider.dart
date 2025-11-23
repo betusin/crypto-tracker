@@ -61,12 +61,8 @@ class TransactionProvider with ChangeNotifier {
 
   // Simple calculation: (Current Value) - (Net Invested)
   // Net Invested = (Buy Amount * Buy Price) - (Sell Amount * Sell Price)
-  double get totalProfit {
-    double currentValue = 0;
-
-    // Group by crypto to calculate holdings
+  Map<String, double> get holdings {
     Map<String, double> holdings = {};
-
     for (var tx in _transactions) {
       if (tx.type == TransactionType.buy) {
         holdings[tx.cryptoId] = (holdings[tx.cryptoId] ?? 0) + tx.amount;
@@ -74,6 +70,13 @@ class TransactionProvider with ChangeNotifier {
         holdings[tx.cryptoId] = (holdings[tx.cryptoId] ?? 0) - tx.amount;
       }
     }
+    return holdings;
+  }
+
+  // Simple calculation: (Current Value) - (Net Invested)
+  // Net Invested = (Buy Amount * Buy Price) - (Sell Amount * Sell Price)
+  double get totalProfit {
+    double currentValue = 0;
 
     // Calculate current value of holdings
     holdings.forEach((cryptoId, amount) {

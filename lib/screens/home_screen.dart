@@ -13,10 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const TransactionListScreen(),
-    const DashboardScreen(),
-  ];
+  final List<Widget> _screens = [const DashboardScreen(), const TransactionListScreen()];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -27,29 +24,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Crypto Tracker'),
-      ),
+      appBar: AppBar(title: const Text('Crypto Tracker')),
       body: _screens[_selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
-          );
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTransactionScreen()));
         },
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Transactions',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Transactions'),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

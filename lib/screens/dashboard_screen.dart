@@ -24,17 +24,11 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      const Text(
-                        'Total Portfolio Value',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
+                      const Text('Total Portfolio Value', style: TextStyle(fontSize: 16, color: Colors.grey)),
                       const SizedBox(height: 10),
                       Text(
                         '\$${totalValue.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -47,10 +41,7 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      const Text(
-                        'Total Profit / Loss',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
+                      const Text('Total Profit / Loss', style: TextStyle(fontSize: 16, color: Colors.grey)),
                       const SizedBox(height: 10),
                       Text(
                         '${isProfitPositive ? "+" : ""}\$${totalProfit.toStringAsFixed(2)}',
@@ -71,15 +62,21 @@ class DashboardScreen extends StatelessWidget {
                 label: const Text('Update Prices'),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Current Prices:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
-              ...provider.currentPrices.entries.map((entry) {
+              ...provider.holdings.entries.map((entry) {
+                final cryptoId = entry.key;
+                final amount = entry.value;
+                final currentPrice = provider.currentPrices[cryptoId] ?? 0;
+                final valueInUsd = amount * currentPrice;
+
+                // Only show if amount is not 0 (or very close to 0)
+                if (amount.abs() < 0.000001) return const SizedBox.shrink();
+
                 return ListTile(
-                  title: Text(entry.key.toUpperCase()),
-                  trailing: Text('\$${entry.value.toStringAsFixed(2)}'),
+                  title: Text(cryptoId.toUpperCase()),
+                  subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoId == 'bitcoin' ? 'BTC' : 'ETH'}'),
+                  trailing: Text('\$${valueInUsd.toStringAsFixed(2)}'),
                 );
               }),
             ],
