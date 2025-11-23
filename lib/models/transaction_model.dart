@@ -1,7 +1,7 @@
 enum TransactionType { buy, sell }
 
 class TransactionModel {
-  final int? id;
+  final String? id;
   final TransactionType type;
   final String cryptoId;
   final double amount;
@@ -19,7 +19,6 @@ class TransactionModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'type': type.index,
       'cryptoId': cryptoId,
       'amount': amount,
@@ -28,9 +27,9 @@ class TransactionModel {
     };
   }
 
-  factory TransactionModel.fromMap(Map<String, dynamic> map) {
+  factory TransactionModel.fromMap(Map<String, dynamic> map, String id) {
     return TransactionModel(
-      id: map['id'],
+      id: id,
       type: TransactionType.values[map['type']],
       cryptoId: map['cryptoId'],
       amount: map['amount'],

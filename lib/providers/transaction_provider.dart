@@ -29,11 +29,11 @@ class TransactionProvider with ChangeNotifier {
   }
 
   Future<void> addTransaction(TransactionModel transaction) async {
-    await _dbService.insertTransaction(transaction);
+    await _dbService.addTransaction(transaction);
     await loadTransactions();
   }
 
-  Future<void> deleteTransaction(int id) async {
+  Future<void> deleteTransaction(String id) async {
     await _dbService.deleteTransaction(id);
     await loadTransactions();
   }
