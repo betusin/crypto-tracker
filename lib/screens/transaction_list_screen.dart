@@ -10,6 +10,8 @@ class TransactionListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
@@ -25,12 +27,12 @@ class TransactionListScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             final tx = provider.transactions[index];
             final isBuy = tx.type == TransactionType.buy;
-            final color = isBuy ? Colors.green : Colors.red;
+            final color = isBuy ? colorScheme.tertiary : colorScheme.error;
             final icon = isBuy ? Icons.arrow_downward : Icons.arrow_upward;
 
             return Dismissible(
               key: Key(tx.id.toString()),
-              background: Container(color: Colors.red),
+              background: Container(color: colorScheme.error),
               onDismissed: (direction) {
                 final authProvider = Provider.of<AuthProvider>(context, listen: false);
                 final userId = authProvider.userId;
@@ -41,7 +43,7 @@ class TransactionListScreen extends StatelessWidget {
               },
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: color.withOpacity(0.1),
+                  backgroundColor: color.withValues(alpha: 0.1),
                   child: Icon(icon, color: color),
                 ),
                 title: Text('${tx.cryptoId.toUpperCase()} ${isBuy ? "Buy" : "Sell"}'),
@@ -56,7 +58,7 @@ class TransactionListScreen extends StatelessWidget {
                     ),
                     Text(
                       '\$${tx.pricePerUnit.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),

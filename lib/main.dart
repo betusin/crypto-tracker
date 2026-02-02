@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Crypto Tracker',
-        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+        theme: ThemeData(colorSchemeSeed: Colors.amber),
         home: const AuthWrapper(),
       ),
     );

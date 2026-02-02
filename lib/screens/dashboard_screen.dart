@@ -7,6 +7,8 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Consumer<TransactionProvider>(
       builder: (context, provider, child) {
         final totalValue = provider.totalPortfolioValue;
@@ -24,7 +26,10 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      const Text('Total Portfolio Value', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                      Text(
+                        'Total Portfolio Value',
+                        style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant),
+                      ),
                       const SizedBox(height: 10),
                       Text(
                         '\$${totalValue.toStringAsFixed(2)}',
@@ -41,14 +46,14 @@ class DashboardScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(20.0),
                   child: Column(
                     children: [
-                      const Text('Total Profit / Loss', style: TextStyle(fontSize: 16, color: Colors.grey)),
+                      Text('Total Profit / Loss', style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant)),
                       const SizedBox(height: 10),
                       Text(
                         '${isProfitPositive ? "+" : ""}\$${totalProfit.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: isProfitPositive ? Colors.green : Colors.red,
+                          color: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
                         ),
                       ),
                     ],
