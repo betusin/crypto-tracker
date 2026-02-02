@@ -167,7 +167,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _priceController,
-                      decoration: const InputDecoration(labelText: 'Price per Unit (USD)'),
+                      decoration: const InputDecoration(labelText: 'Price per Unit (EUR)'),
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       validator: (value) {
                         if (value == null || value.isEmpty) {

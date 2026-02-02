@@ -1,18 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../common/model/currency.dart';
 
 class PriceService {
   static const String _baseUrl = 'https://api.coingecko.com/api/v3/simple/price';
 
-  Future<double> fetchPrice(String cryptoId) async {
+  Future<double> fetchPrice(String cryptoId, {Currency currency = Currency.eur}) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl?ids=$cryptoId&vs_currencies=usd'),
-      );
+      final response = await http.get(Uri.parse('$_baseUrl?ids=$cryptoId&vs_currencies=${currency.value}'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return (data[cryptoId]['usd'] as num).toDouble();
+        return (data[cryptoId][currency.value] as num).toDouble();
       } else {
         throw Exception('Failed to load price');
       }
@@ -21,17 +20,15 @@ class PriceService {
     }
   }
 
-  Future<Map<String, double>> fetchCurrentPrices() async {
+  Future<Map<String, double>> fetchCurrentPrices({Currency currency = Currency.eur}) async {
     try {
-      final response = await http.get(
-        Uri.parse('$_baseUrl?ids=bitcoin,ethereum&vs_currencies=usd'),
-      );
+      final response = await http.get(Uri.parse('$_baseUrl?ids=bitcoin,ethereum&vs_currencies=${currency.value}'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return {
-          'bitcoin': (data['bitcoin']['usd'] as num).toDouble(),
-          'ethereum': (data['ethereum']['usd'] as num).toDouble(),
+          'bitcoin': (data['bitcoin'][currency.value] as num).toDouble(),
+          'ethereum': (data['ethereum'][currency.value] as num).toDouble(),
         };
       } else {
         throw Exception('Failed to load prices');

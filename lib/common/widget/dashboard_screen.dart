@@ -32,7 +32,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        '\$${totalValue.toStringAsFixed(2)}',
+                        '€${totalValue.toStringAsFixed(2)}',
                         style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -49,7 +49,7 @@ class DashboardScreen extends StatelessWidget {
                       Text('Total Profit / Loss', style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant)),
                       const SizedBox(height: 10),
                       Text(
-                        '${isProfitPositive ? "+" : ""}\$${totalProfit.toStringAsFixed(2)}',
+                        '${isProfitPositive ? "+" : ""}€${totalProfit.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -73,7 +73,7 @@ class DashboardScreen extends StatelessWidget {
                 final cryptoId = entry.key;
                 final amount = entry.value;
                 final currentPrice = provider.currentPrices[cryptoId] ?? 0;
-                final valueInUsd = amount * currentPrice;
+                final valueInEur = amount * currentPrice;
 
                 // Only show if amount is not 0 (or very close to 0)
                 if (amount.abs() < 0.000001) return const SizedBox.shrink();
@@ -81,7 +81,7 @@ class DashboardScreen extends StatelessWidget {
                 return ListTile(
                   title: Text(cryptoId.toUpperCase()),
                   subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoId == 'bitcoin' ? 'BTC' : 'ETH'}'),
-                  trailing: Text('\$${valueInUsd.toStringAsFixed(2)}'),
+                  trailing: Text('€${valueInEur.toStringAsFixed(2)}'),
                 );
               }),
             ],
