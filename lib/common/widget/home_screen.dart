@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'add_transaction_screen.dart';
+import '../../transaction/widget/add_transaction_screen.dart';
 import 'dashboard_screen.dart';
-import 'transaction_list_screen.dart';
+import '../../transaction/widget/transaction_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

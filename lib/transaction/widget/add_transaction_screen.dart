@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../models/transaction_model.dart';
-import '../providers/transaction_provider.dart';
-import '../providers/auth_provider.dart';
-import '../services/price_service.dart';
+import '../model/transaction_model.dart';
+import '../service/transaction_provider.dart';
+import '../../auth/service/auth_provider.dart';
+import '../../price/service/price_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});

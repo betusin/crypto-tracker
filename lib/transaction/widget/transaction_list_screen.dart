@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../models/transaction_model.dart';
-import '../providers/transaction_provider.dart';
-import '../providers/auth_provider.dart';
+import '../model/transaction_model.dart';
+import '../service/transaction_provider.dart';
+import '../../auth/service/auth_provider.dart';
 
 class TransactionListScreen extends StatelessWidget {
   const TransactionListScreen({super.key});
