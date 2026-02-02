@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/price_service.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -38,9 +39,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       _priceController.text = price.toString();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to fetch price: $e')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch price: $e')));
       }
     } finally {
       if (mounted) {
@@ -67,7 +66,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   void _saveTransaction() {
     if (_formKey.currentState!.validate()) {
+      // TODO(betka): use auth service injection instead of provider
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.userId;
+
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User not authenticated')));
+        return;
+      }
+
       final transaction = TransactionModel(
+        userId: userId,
         type: _type,
         cryptoId: _cryptoId,
         amount: double.parse(_amountController.text),
@@ -75,8 +84,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         date: _selectedDate,
       );
 
-      Provider.of<TransactionProvider>(context, listen: false)
-          .addTransaction(transaction);
+      Provider.of<TransactionProvider>(context, listen: false).addTransaction(transaction);
 
       Navigator.pop(context);
     }
@@ -85,9 +93,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Transaction'),
-      ),
+      appBar: AppBar(title: const Text('Add Transaction')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -176,11 +182,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   IconButton(
                     icon: _isFetchingPrice
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.download),
                     onPressed: _isFetchingPrice ? null : _fetchPrice,
                     tooltip: 'Fetch Current Price',
@@ -197,10 +199,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
               const SizedBox(height: 20),
 
-              ElevatedButton(
-                onPressed: _saveTransaction,
-                child: const Text('Save Transaction'),
-              ),
+              ElevatedButton(onPressed: _saveTransaction, child: const Text('Save Transaction')),
             ],
           ),
         ),

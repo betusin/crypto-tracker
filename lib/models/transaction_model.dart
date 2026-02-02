@@ -1,7 +1,9 @@
 enum TransactionType { buy, sell }
 
+// TODO(betka): use serializable, identifiable
 class TransactionModel {
   final String? id;
+  final String userId;
   final TransactionType type;
   final String cryptoId;
   final double amount;
@@ -10,6 +12,7 @@ class TransactionModel {
 
   TransactionModel({
     this.id,
+    required this.userId,
     required this.type,
     required this.cryptoId,
     required this.amount,
@@ -17,8 +20,10 @@ class TransactionModel {
     required this.date,
   });
 
+  // TODO(betka): use JsonSerializable
   Map<String, dynamic> toMap() {
     return {
+      'userId': userId,
       'type': type.index,
       'cryptoId': cryptoId,
       'amount': amount,
@@ -30,6 +35,7 @@ class TransactionModel {
   factory TransactionModel.fromMap(Map<String, dynamic> map, String id) {
     return TransactionModel(
       id: id,
+      userId: map['userId'] ?? '',
       type: TransactionType.values[map['type']],
       cryptoId: map['cryptoId'],
       amount: map['amount'],

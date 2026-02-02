@@ -2,7 +2,8 @@ import 'package:crypto_tracker/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/transaction_provider.dart';
-import 'screens/home_screen.dart';
+import 'providers/auth_provider.dart';
+import 'widgets/auth_wrapper.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 
@@ -17,12 +18,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(betka): use ioc with getIt instead of providers
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => TransactionProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
+      ],
       child: MaterialApp(
         title: 'Crypto Tracker',
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-        home: const HomeScreen(),
+        home: const AuthWrapper(),
       ),
     );
   }

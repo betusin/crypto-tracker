@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
 import '../providers/transaction_provider.dart';
+import '../providers/auth_provider.dart';
 
 class TransactionListScreen extends StatelessWidget {
   const TransactionListScreen({super.key});
@@ -31,10 +32,12 @@ class TransactionListScreen extends StatelessWidget {
               key: Key(tx.id.toString()),
               background: Container(color: Colors.red),
               onDismissed: (direction) {
-                provider.deleteTransaction(tx.id!);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Transaction deleted')),
-                );
+                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final userId = authProvider.userId;
+                if (userId != null) {
+                  provider.deleteTransaction(tx.id!, userId);
+                }
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Transaction deleted')));
               },
               child: ListTile(
                 leading: CircleAvatar(
@@ -49,10 +52,7 @@ class TransactionListScreen extends StatelessWidget {
                   children: [
                     Text(
                       '${isBuy ? "+" : "-"}${tx.amount} ${tx.cryptoId == 'bitcoin' ? 'BTC' : 'ETH'}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: color),
                     ),
                     Text(
                       '\$${tx.pricePerUnit.toStringAsFixed(2)}',

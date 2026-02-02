@@ -16,26 +16,25 @@ class TransactionProvider with ChangeNotifier {
   final PriceService _priceService = PriceService();
 
   TransactionProvider() {
-    loadTransactions();
     fetchCurrentPrices();
   }
 
-  Future<void> loadTransactions() async {
+  Future<void> loadTransactions(String userId) async {
     _isLoading = true;
     notifyListeners();
-    _transactions = await _dbService.getTransactions();
+    _transactions = await _dbService.getTransactions(userId);
     _isLoading = false;
     notifyListeners();
   }
 
   Future<void> addTransaction(TransactionModel transaction) async {
     await _dbService.addTransaction(transaction);
-    await loadTransactions();
+    await loadTransactions(transaction.userId);
   }
 
-  Future<void> deleteTransaction(String id) async {
+  Future<void> deleteTransaction(String id, String userId) async {
     await _dbService.deleteTransaction(id);
-    await loadTransactions();
+    await loadTransactions(userId);
   }
 
   Future<void> fetchCurrentPrices() async {

@@ -2,14 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/transaction_model.dart';
 
 class DatabaseService {
+  // TODO(betka): create database repository
   final CollectionReference _transactionsCollection = FirebaseFirestore.instance.collection('transactions');
 
   Future<void> addTransaction(TransactionModel transaction) async {
     await _transactionsCollection.add(transaction.toMap());
   }
 
-  Future<List<TransactionModel>> getTransactions() async {
-    final snapshot = await _transactionsCollection.orderBy('date', descending: true).get();
+  Future<List<TransactionModel>> getTransactions(String userId) async {
+    final snapshot = await _transactionsCollection
+        .where('userId', isEqualTo: userId)
+        .orderBy('date', descending: true)
+        .get();
 
     return snapshot.docs.map((doc) {
       return TransactionModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
