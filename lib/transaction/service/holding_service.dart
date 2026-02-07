@@ -1,4 +1,4 @@
-import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:crypto_tracker/transaction/service/transaction_service.dart';

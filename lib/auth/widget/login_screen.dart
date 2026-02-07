@@ -1,5 +1,6 @@
 import 'package:crypto_tracker/auth/service/auth_service.dart';
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
+import 'package:crypto_tracker/currency/widget/bitcoin_logo.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
@@ -35,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    // TODO(betka): check the layout and design of this screen
     return PageWrapper(
       child: Container(
         decoration: BoxDecoration(
@@ -45,46 +45,27 @@ class _LoginScreenState extends State<LoginScreen> {
             colors: [colorScheme.primaryContainer, colorScheme.primary],
           ),
         ),
-        child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildAppIcon(colorScheme),
-                  LARGE_GAP,
-                  Text(
-                    'Crypto Tracker',
-                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
-                  ),
-                  SMALL_GAP,
-                  Text(
-                    'Track your crypto portfolio',
-                    style: TextStyle(fontSize: 16, color: colorScheme.onPrimaryContainer),
-                  ),
-                  EXTRA_LARGE_GAP,
-                  _buildSignInButton(colorScheme),
-                  MEDIUM_GAP,
-                  Text(
-                    'Your data will be securely stored\nand can be linked to an account later',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: colorScheme.onPrimaryContainer.withValues(alpha: 0.7)),
-                  ),
-                ],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              BitcoinLogo(),
+              LARGE_GAP,
+              Text(
+                'Crypto Tracker',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
               ),
-            ),
+              SMALL_GAP,
+              Text(
+                'Track your crypto portfolio',
+                style: TextStyle(fontSize: 16, color: colorScheme.onPrimaryContainer),
+              ),
+              LARGE_GAP,
+              Padding(padding: const EdgeInsets.all(LARGE_GAP_SIZE), child: _buildSignInButton(colorScheme)),
+            ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildAppIcon(ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(20)),
-      child: Icon(Icons.currency_bitcoin, size: 80, color: colorScheme.primary),
     );
   }
 

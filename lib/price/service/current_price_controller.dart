@@ -1,4 +1,4 @@
-import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/price/service/price_service.dart';
 import 'package:rxdart/rxdart.dart';
 

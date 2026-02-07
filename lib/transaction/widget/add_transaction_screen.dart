@@ -1,7 +1,7 @@
 import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
 import 'package:crypto_tracker/common/util/id_generator.dart';
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
-import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';

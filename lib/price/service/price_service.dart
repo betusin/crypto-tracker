@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:http/http.dart' as http;
-import 'package:crypto_tracker/common/model/currency.dart';
+import 'package:crypto_tracker/currency/model/currency.dart';
 
 class PriceService {
   static const String _baseUrl = 'https://api.coingecko.com/api/v3/simple/price';

@@ -1,4 +1,4 @@
-import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/database/model/identifiable_serializable.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:json_annotation/json_annotation.dart';
