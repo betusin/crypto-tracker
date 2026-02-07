@@ -1,5 +1,6 @@
 import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
 import 'package:crypto_tracker/common/util/id_generator.dart';
+import 'package:crypto_tracker/common/widget/page_wrapper.dart';
 import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
@@ -75,9 +76,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add Transaction')),
-      body: Padding(
+    return PageWrapper(
+      title: 'Add Transaction',
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,

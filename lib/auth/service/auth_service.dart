@@ -8,30 +8,16 @@ class AuthService {
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  Future<UserCredential> signInAnonymously() async {
-    try {
-      return await _auth.signInAnonymously();
-    } catch (e) {
-      rethrow;
-    }
-  }
+  Future<UserCredential> signInAnonymously() async => await _auth.signInAnonymously();
 
   Future<void> signOut() => _auth.signOut();
 
   Future<UserCredential> linkWithEmailAndPassword(String email, String password) async {
-    try {
-      final credential = EmailAuthProvider.credential(email: email, password: password);
-      return await _auth.currentUser!.linkWithCredential(credential);
-    } catch (e) {
-      rethrow;
-    }
+    final credential = EmailAuthProvider.credential(email: email, password: password);
+    return await _auth.currentUser!.linkWithCredential(credential);
   }
 
   Future<UserCredential> linkWithProvider(AuthProvider provider) async {
-    try {
-      return await _auth.currentUser!.linkWithProvider(provider);
-    } catch (e) {
-      rethrow;
-    }
+    return await _auth.currentUser!.linkWithProvider(provider);
   }
 }

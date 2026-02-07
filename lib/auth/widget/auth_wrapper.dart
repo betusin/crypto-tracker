@@ -13,12 +13,7 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return HandlingStreamBuilder<User?>(
       stream: getIt<AuthService>().authStateChanges,
-      builder: (context, user) {
-        if (user != null) {
-          return const HomeScreen();
-        }
-        return const LoginScreen();
-      },
+      builder: (context, user) => user == null ? const LoginScreen() : const HomeScreen(),
     );
   }
 }

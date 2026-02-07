@@ -1,3 +1,4 @@
+import 'package:crypto_tracker/common/extension/string_extension.dart';
 import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
@@ -21,7 +22,7 @@ class DashboardScreen extends StatelessWidget {
       child: HandlingStreamBuilder(
         stream: _holdingService.holdingsDataStream(),
         builder: (context, data) {
-          final (holdings, currentPrices, totalPortfolioValue, totalProfit) = data;
+          final (holdings, currentPrices, totalProfit, totalPortfolioValue) = data;
           final isProfitPositive = totalProfit >= 0;
 
           return ListView(
@@ -31,7 +32,7 @@ class DashboardScreen extends StatelessWidget {
               STANDARD_GAP,
               SummaryCard(
                 title: 'Total Profit / Loss',
-                value: '${isProfitPositive ? "+" : ""}€${totalProfit.toStringAsFixed(2)}',
+                value: '${isProfitPositive ? "+" : ""} €${totalProfit.toStringAsFixed(2)}',
                 valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
               ),
               // TODO(betka): display current prices of cryptocurrencies - maybe selector for which crypto to display
@@ -48,9 +49,9 @@ class DashboardScreen extends StatelessWidget {
                 if (amount.abs() < 0.000001) return const SizedBox.shrink();
 
                 return ListTile(
-                  title: Text(cryptoCurrency.value.toUpperCase()),
+                  title: Text(cryptoCurrency.value.capitalize()),
                   subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoCurrency.symbol}'),
-                  trailing: Text('€${valueInEur.toStringAsFixed(2)}'),
+                  trailing: Text('€${valueInEur.toStringAsFixed(2)}', style: TextStyle(fontSize: 16)),
                 );
               }),
             ],

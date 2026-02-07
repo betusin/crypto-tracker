@@ -1,7 +1,8 @@
+import 'package:crypto_tracker/common/widget/page_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto_tracker/transaction/widget/add_transaction_screen.dart';
 import 'package:crypto_tracker/common/widget/dashboard_screen.dart';
-import 'package:crypto_tracker/transaction/widget/transaction_list_screen.dart';
+import 'package:crypto_tracker/transaction/widget/transaction_list.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,33 +14,34 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [DashboardScreen(), TransactionListScreen()];
+  final List<Widget> _screens = [DashboardScreen(), TransactionList()];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Crypto Tracker')),
-      body: _screens[_selectedIndex],
+    return PageWrapper(
+      title: 'Crypto Tracker',
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTransactionScreen()));
-        },
+        onPressed: () => _onAddTransaction(context),
         child: const Icon(Icons.add),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Transactions'),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+      child: _screens[_selectedIndex],
     );
   }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+        BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Transactions'),
+      ],
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+    );
+  }
+
+  Future<dynamic> _onAddTransaction(BuildContext context) =>
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTransactionScreen()));
 }
