@@ -44,4 +44,8 @@ class FirestoreRepository<T extends IdentifiableSerializable> {
     final snapshot = await _collectionMappedReference.get();
     return snapshot.docs.map((doc) => doc.data()).toList();
   }
+
+  Stream<List<T>> observeAll() {
+    return _collectionMappedReference.snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  }
 }

@@ -1,6 +1,6 @@
+import 'package:crypto_tracker/auth/service/auth_service.dart';
+import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:crypto_tracker/auth/service/auth_provider.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -11,25 +11,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _authService = getIt<AuthService>();
   bool _isLoading = false;
 
   Future<void> _signInAnonymously() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.signInAnonymously();
+      await _authService.signInAnonymously();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to sign in: $e')));
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -38,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
+    // TODO(betka): refactor this to be more readable
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

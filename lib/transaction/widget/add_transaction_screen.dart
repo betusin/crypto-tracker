@@ -1,11 +1,12 @@
+import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
+import 'package:crypto_tracker/common/util/id_generator.dart';
 import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/database/service/firestore_repository.dart';
+import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
-import 'package:crypto_tracker/transaction/service/transaction_provider.dart';
-import 'package:crypto_tracker/auth/service/auth_provider.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -17,10 +18,15 @@ class AddTransactionScreen extends StatefulWidget {
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
-  TransactionType _type = TransactionType.buy;
-  Cryptocurrency _selectedCryptoCurrency = Cryptocurrency.bitcoin;
+
+  final _signedInUserProvider = getIt<SignedInUserProvider>();
+  final _transactionRepository = getIt<FirestoreRepository<TransactionModel>>();
+
   final _amountController = TextEditingController();
   final _priceController = TextEditingController();
+
+  TransactionType _type = TransactionType.buy;
+  Cryptocurrency _selectedCryptoCurrency = Cryptocurrency.bitcoin;
   DateTime _selectedDate = DateTime.now();
 
   @override
@@ -44,9 +50,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   void _saveTransaction() {
     if (_formKey.currentState!.validate()) {
-      // TODO(betka): use auth service injection instead of provider
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final userId = authProvider.userId;
+      final userId = _signedInUserProvider.currentUser?.uid;
 
       if (userId == null) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('User not authenticated')));
@@ -54,8 +58,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
 
       final transaction = TransactionModel(
-        // TODO(betka): generate ID
-        id: '1',
+        id: generateId(),
         userId: userId,
         type: _type,
         cryptoCurrency: _selectedCryptoCurrency,
@@ -64,7 +67,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         date: _selectedDate,
       );
 
-      Provider.of<TransactionProvider>(context, listen: false).addTransaction(transaction);
+      _transactionRepository.add(transaction);
 
       Navigator.pop(context);
     }
