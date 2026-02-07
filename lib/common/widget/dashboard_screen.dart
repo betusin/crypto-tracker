@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../transaction/service/transaction_provider.dart';
+import 'summary_card.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -20,45 +21,13 @@ class DashboardScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Total Portfolio Value',
-                        style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        '€${totalValue.toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              SummaryCard(title: 'Total Portfolio Value', value: '€${totalValue.toStringAsFixed(2)}'),
               const SizedBox(height: 16),
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      Text('Total Profit / Loss', style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant)),
-                      const SizedBox(height: 10),
-                      Text(
-                        '${isProfitPositive ? "+" : ""}€${totalProfit.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              // TODO(betka): total profit should be calculated from transactions minus paid amount
+              SummaryCard(
+                title: 'Total Profit / Loss',
+                value: '${isProfitPositive ? "+" : ""}€${totalProfit.toStringAsFixed(2)}',
+                valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
