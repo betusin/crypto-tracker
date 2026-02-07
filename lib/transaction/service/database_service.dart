@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto_tracker/database/util/collection_names.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 
 class DatabaseService {
   // TODO(betka): create database repository
-  final CollectionReference _transactionsCollection = FirebaseFirestore.instance.collection('transactions');
+  final CollectionReference _transactionsCollection = FirebaseFirestore.instance.collection(
+    CollectionNames.transactions,
+  );
 
   Future<void> addTransaction(TransactionModel transaction) async {
-    await _transactionsCollection.add(transaction.toMap());
+    await _transactionsCollection.add(transaction.toJson());
   }
 
   Future<List<TransactionModel>> getTransactions(String userId) async {
@@ -16,7 +19,7 @@ class DatabaseService {
         .get();
 
     return snapshot.docs.map((doc) {
-      return TransactionModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      return TransactionModel.fromJson(doc.data() as Map<String, dynamic>);
     }).toList();
   }
 

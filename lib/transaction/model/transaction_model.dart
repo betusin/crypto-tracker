@@ -1,9 +1,13 @@
 import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/database/model/identifiable_serializable.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'transaction_model.g.dart';
 
 // TODO(betka): use serializable, identifiable
-class TransactionModel {
-  final String? id;
+@JsonSerializable()
+class TransactionModel extends IdentifiableSerializableBase {
   final String userId;
   final TransactionType type;
   final Cryptocurrency cryptoCurrency;
@@ -12,7 +16,7 @@ class TransactionModel {
   final DateTime date;
 
   TransactionModel({
-    this.id,
+    required super.id,
     required this.userId,
     required this.type,
     required this.cryptoCurrency,
@@ -21,27 +25,8 @@ class TransactionModel {
     required this.date,
   });
 
-  // TODO(betka): use JsonSerializable instead
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'type': type.index,
-      'cryptoId': cryptoCurrency,
-      'amount': amount,
-      'pricePerUnit': pricePerUnit,
-      'date': date.toIso8601String(),
-    };
-  }
+  @override
+  Map<String, dynamic> toJson() => _$TransactionModelToJson(this);
 
-  factory TransactionModel.fromMap(Map<String, dynamic> map, String id) {
-    return TransactionModel(
-      id: id,
-      userId: map['userId'] ?? '',
-      type: TransactionType.values[map['type']],
-      cryptoCurrency: Cryptocurrency.values.firstWhere((e) => e.name == map['cryptoId']),
-      amount: map['amount'],
-      pricePerUnit: map['pricePerUnit'],
-      date: DateTime.parse(map['date']),
-    );
-  }
+  factory TransactionModel.fromJson(Map<String, dynamic> json) => _$TransactionModelFromJson(json);
 }

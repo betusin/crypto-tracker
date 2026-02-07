@@ -54,6 +54,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
 
       final transaction = TransactionModel(
+        // TODO(betka): generate ID
+        id: '1',
         userId: userId,
         type: _type,
         cryptoCurrency: _selectedCryptoCurrency,
