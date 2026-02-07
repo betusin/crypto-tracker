@@ -1,10 +1,11 @@
+import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/service/transaction_provider.dart';
 import 'package:crypto_tracker/auth/service/auth_provider.dart';
-import 'package:crypto_tracker/price/service/price_service.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -17,38 +18,16 @@ class AddTransactionScreen extends StatefulWidget {
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   TransactionType _type = TransactionType.buy;
-  String _cryptoId = 'bitcoin';
+  Cryptocurrency _selectedCryptoCurrency = Cryptocurrency.bitcoin;
   final _amountController = TextEditingController();
   final _priceController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  final PriceService _priceService = PriceService();
-  bool _isFetchingPrice = false;
 
   @override
   void dispose() {
     _amountController.dispose();
     _priceController.dispose();
     super.dispose();
-  }
-
-  Future<void> _fetchPrice() async {
-    setState(() {
-      _isFetchingPrice = true;
-    });
-    try {
-      final price = await _priceService.fetchPrice(_cryptoId);
-      _priceController.text = price.toString();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to fetch price: $e')));
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isFetchingPrice = false;
-        });
-      }
-    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -59,9 +38,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      setState(() => _selectedDate = picked);
     }
   }
 
@@ -79,7 +56,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final transaction = TransactionModel(
         userId: userId,
         type: _type,
-        cryptoId: _cryptoId,
+        cryptoCurrency: _selectedCryptoCurrency,
         amount: double.parse(_amountController.text),
         pricePerUnit: double.parse(_priceController.text),
         date: _selectedDate,
@@ -99,115 +76,102 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: ListView(
+          child: Column(
             children: [
-              // Transaction Type
-              Row(
-                children: [
-                  Expanded(
-                    child: RadioListTile<TransactionType>(
-                      title: const Text('Buy'),
-                      value: TransactionType.buy,
-                      groupValue: _type,
-                      onChanged: (TransactionType? value) {
-                        setState(() {
-                          _type = value!;
-                        });
-                      },
-                    ),
-                  ),
-                  Expanded(
-                    child: RadioListTile<TransactionType>(
-                      title: const Text('Sell'),
-                      value: TransactionType.sell,
-                      groupValue: _type,
-                      onChanged: (TransactionType? value) {
-                        setState(() {
-                          _type = value!;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              // Crypto Selection
-              DropdownButtonFormField<String>(
-                value: _cryptoId,
-                decoration: const InputDecoration(labelText: 'Cryptocurrency'),
-                items: const [
-                  DropdownMenuItem(value: 'bitcoin', child: Text('Bitcoin (BTC)')),
-                  DropdownMenuItem(value: 'ethereum', child: Text('Ethereum (ETH)')),
-                ],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _cryptoId = newValue!;
-                  });
-                },
-              ),
-
-              // Amount
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(labelText: 'Amount'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter an amount';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-
-              // Price
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _priceController,
-                      decoration: const InputDecoration(labelText: 'Price per Unit (EUR)'),
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a price';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return 'Please enter a valid number';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    icon: _isFetchingPrice
-                        ? SizedBox(
-                            width: MEDIUM_GAP_SIZE,
-                            height: MEDIUM_GAP_SIZE,
-                            child: const CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.download),
-                    onPressed: _isFetchingPrice ? null : _fetchPrice,
-                    tooltip: 'Fetch Current Price',
-                  ),
-                ],
-              ),
-
-              // Date
-              ListTile(
-                title: Text('Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}'),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _selectDate(context),
-              ),
-
+              _buildTransactionTypeRadios(),
+              _buildCryptoSelector(),
+              _buildAmountField(),
+              _buildPriceField(),
+              _buildDateSelector(context),
               MEDIUM_GAP,
-
               ElevatedButton(onPressed: _saveTransaction, child: const Text('Save Transaction')),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDateSelector(BuildContext context) {
+    return InkWell(
+      onTap: () => _selectDate(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: SMALL_GAP_SIZE),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Date: ${DateFormat('yyyy-MM-dd').format(_selectedDate)}', style: TextTheme.of(context).bodyLarge),
+            const Icon(Icons.calendar_today),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriceField() {
+    return TextFormField(
+      controller: _priceController,
+      decoration: const InputDecoration(labelText: 'Price per Unit (EUR)'),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      validator: (value) {
+        // TODO(betka): extract to a reusable validator and reuse here and below, it could also be a DoubleFormField or similar
+        if (value == null || value.isEmpty) {
+          return 'Please enter a price';
+        }
+        if (double.tryParse(value) == null) {
+          return 'Please enter a valid number';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildAmountField() {
+    return TextFormField(
+      controller: _amountController,
+      decoration: InputDecoration(labelText: 'Amount (${_selectedCryptoCurrency.symbol})'),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter an amount';
+        }
+        if (double.tryParse(value) == null) {
+          return 'Please enter a valid number';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildCryptoSelector() {
+    return DropdownButtonFormField<Cryptocurrency>(
+      initialValue: Cryptocurrency.bitcoin,
+      decoration: const InputDecoration(labelText: 'Cryptocurrency'),
+      items: Cryptocurrency.values
+          .map((crypto) => DropdownMenuItem(value: crypto, child: Text('${crypto.value} (${crypto.symbol})')))
+          .toList(),
+      onChanged: (Cryptocurrency? newValue) =>
+          newValue == null ? null : setState(() => _selectedCryptoCurrency = newValue),
+    );
+  }
+
+  Widget _buildTransactionTypeRadios() {
+    return RadioGroup(
+      groupValue: _type,
+      onChanged: (TransactionType? value) => value == null ? null : _setTransactionType(value),
+      child: Row(children: TransactionType.values.map(_buildTransactionRadio).toList()),
+    );
+  }
+
+  void _setTransactionType(TransactionType value) => setState(() => _type = value);
+
+  Widget _buildTransactionRadio(TransactionType transactionType) {
+    return Expanded(
+      child: ListTile(
+        // TODO(betka): use capitalize extension
+        title: Text(transactionType.name),
+        leading: Radio<TransactionType>(toggleable: true, value: transactionType),
+        onTap: () => _setTransactionType(transactionType),
       ),
     );
   }

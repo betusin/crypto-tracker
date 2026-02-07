@@ -44,8 +44,8 @@ class DashboardScreen extends StatelessWidget {
                 if (amount.abs() < 0.000001) return const SizedBox.shrink();
 
                 return ListTile(
-                  title: Text(cryptoId.toUpperCase()),
-                  subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoId == 'bitcoin' ? 'BTC' : 'ETH'}'),
+                  title: Text(cryptoId.value.toUpperCase()),
+                  subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoId.symbol}'),
                   trailing: Text('€${valueInEur.toStringAsFixed(2)}'),
                 );
               }),

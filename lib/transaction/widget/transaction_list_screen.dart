@@ -1,7 +1,7 @@
+import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/service/transaction_provider.dart';
 import 'package:crypto_tracker/auth/service/auth_provider.dart';
 
@@ -46,14 +46,14 @@ class TransactionListScreen extends StatelessWidget {
                   backgroundColor: color.withValues(alpha: 0.1),
                   child: Icon(icon, color: color),
                 ),
-                title: Text('${tx.cryptoId.toUpperCase()} ${isBuy ? "Buy" : "Sell"}'),
+                title: Text('${tx.cryptoCurrency.value.toUpperCase()} ${isBuy ? "Buy" : "Sell"}'),
                 subtitle: Text(DateFormat('yyyy-MM-dd').format(tx.date)),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '${isBuy ? "+" : "-"}${tx.amount} ${tx.cryptoId == 'bitcoin' ? 'BTC' : 'ETH'}',
+                      '${isBuy ? "+" : "-"}${tx.amount} ${tx.cryptoCurrency.symbol}',
                       style: TextStyle(fontWeight: FontWeight.bold, color: color),
                     ),
                     Text(

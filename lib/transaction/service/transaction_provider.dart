@@ -1,3 +1,5 @@
+import 'package:crypto_tracker/cryptocurrency/enum/cryptocureny.dart';
+import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/service/database_service.dart';
@@ -5,11 +7,11 @@ import 'package:crypto_tracker/price/service/price_service.dart';
 
 class TransactionProvider with ChangeNotifier {
   List<TransactionModel> _transactions = [];
-  Map<String, double> _currentPrices = {};
+  Map<Cryptocurrency, double> _currentPrices = {};
   bool _isLoading = false;
 
   List<TransactionModel> get transactions => _transactions;
-  Map<String, double> get currentPrices => _currentPrices;
+  Map<Cryptocurrency, double> get currentPrices => _currentPrices;
   bool get isLoading => _isLoading;
 
   final DatabaseService _dbService = DatabaseService();
@@ -27,6 +29,7 @@ class TransactionProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // TODO(betka): this should not be here, it should be inside the db service and loadTransactions should not be needed
   Future<void> addTransaction(TransactionModel transaction) async {
     await _dbService.addTransaction(transaction);
     await loadTransactions(transaction.userId);
@@ -47,52 +50,45 @@ class TransactionProvider with ChangeNotifier {
 
   double get totalPortfolioValue {
     double total = 0;
-    for (var tx in _transactions) {
-      double currentPrice = _currentPrices[tx.cryptoId] ?? tx.pricePerUnit;
-      if (tx.type == TransactionType.buy) {
-        total += tx.amount * currentPrice;
+
+    for (final transaction in _transactions) {
+      double currentPrice = _currentPrices[transaction.cryptoCurrency] ?? transaction.pricePerUnit;
+      if (transaction.type == TransactionType.buy) {
+        total += transaction.amount * currentPrice;
       } else {
-        total -= tx.amount * currentPrice;
+        total -= transaction.amount * currentPrice;
       }
     }
     return total;
   }
 
-  // Simple calculation: (Current Value) - (Net Invested)
-  // Net Invested = (Buy Amount * Buy Price) - (Sell Amount * Sell Price)
-  Map<String, double> get holdings {
-    Map<String, double> holdings = {};
-    for (var tx in _transactions) {
-      if (tx.type == TransactionType.buy) {
-        holdings[tx.cryptoId] = (holdings[tx.cryptoId] ?? 0) + tx.amount;
+  Map<Cryptocurrency, double> get holdings {
+    Map<Cryptocurrency, double> holdings = {};
+
+    for (final transaction in _transactions) {
+      if (transaction.type == TransactionType.buy) {
+        holdings[transaction.cryptoCurrency] = (holdings[transaction.cryptoCurrency] ?? 0) + transaction.amount;
       } else {
-        holdings[tx.cryptoId] = (holdings[tx.cryptoId] ?? 0) - tx.amount;
+        holdings[transaction.cryptoCurrency] = (holdings[transaction.cryptoCurrency] ?? 0) - transaction.amount;
       }
     }
     return holdings;
   }
 
-  // Simple calculation: (Current Value) - (Net Invested)
-  // Net Invested = (Buy Amount * Buy Price) - (Sell Amount * Sell Price)
+  /// Profit calculated as current value of holdings minus cost of holdings
   double get totalProfit {
+    // TODO(betka): reuse totalPortfolioValue (for now currentValue is more precise in double)
     double currentValue = 0;
-
-    // Calculate current value of holdings
     holdings.forEach((cryptoId, amount) {
-      double price = _currentPrices[cryptoId] ?? 0;
+      final price = _currentPrices[cryptoId] ?? 0;
       currentValue += amount * price;
     });
 
-    // Calculate Net Cost (Invested - Sold)
-    double netCost = 0;
-    for (var tx in _transactions) {
-      if (tx.type == TransactionType.buy) {
-        netCost += tx.amount * tx.pricePerUnit;
-      } else {
-        netCost -= tx.amount * tx.pricePerUnit;
-      }
-    }
+    final cost = _transactions.fold(
+      0.0,
+      (acc, transaction) => acc + (transaction.pricePerUnit * (transaction.type == TransactionType.buy ? 1 : -1)),
+    );
 
-    return currentValue - netCost;
+    return currentValue - cost;
   }
 }
