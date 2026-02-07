@@ -30,12 +30,7 @@ class DashboardScreen extends StatelessWidget {
                 value: '${isProfitPositive ? "+" : ""}€${totalProfit.toStringAsFixed(2)}',
                 valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
               ),
-              MEDIUM_GAP,
-              ElevatedButton.icon(
-                onPressed: () => provider.fetchCurrentPrices(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Update Prices'),
-              ),
+              // TODO(betka): display current prices of cryptocurrencies
               MEDIUM_GAP,
               const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SMALL_GAP,
