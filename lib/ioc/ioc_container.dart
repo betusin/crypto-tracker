@@ -3,6 +3,7 @@ import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/database/util/collection_names.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
+import 'package:crypto_tracker/transaction/service/transaction_service.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt getIt = GetIt.instance;
@@ -14,5 +15,6 @@ class IocContainer {
     getIt.registerSingleton(FirestoreRepository(CollectionNames.transactions, TransactionModel.fromJson));
     getIt.registerSingleton(AuthService());
     getIt.registerSingleton(SignedInUserProvider(getIt<AuthService>()));
+    getIt.registerSingleton(TransactionService());
   }
 }

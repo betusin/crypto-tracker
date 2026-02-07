@@ -48,4 +48,15 @@ class FirestoreRepository<T extends IdentifiableSerializable> {
   Stream<List<T>> observeAll() {
     return _collectionMappedReference.snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
   }
+
+  Future<List<T>> getByQuery(Query<T> Function(Query<T> query) queryBuilder) async {
+    final snapshot = await queryBuilder(_collectionMappedReference).get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  Stream<List<T>> observeByQuery(Query<T> Function(Query<T> query) queryBuilder) {
+    return queryBuilder(
+      _collectionMappedReference,
+    ).snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  }
 }

@@ -3,11 +3,13 @@ import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
+import 'package:crypto_tracker/transaction/service/transaction_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class TransactionListScreen extends StatelessWidget {
   final _transactionRepository = getIt<FirestoreRepository<TransactionModel>>();
+  final _transactionService = getIt<TransactionService>();
 
   TransactionListScreen({super.key});
 
@@ -16,8 +18,7 @@ class TransactionListScreen extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return HandlingStreamBuilder(
-      // TODO(betka): observe transactions by user id or use to be created TransactionProvider
-      stream: _transactionRepository.observeAll(),
+      stream: _transactionService.observeTransactionsForCurrentUser(),
       builder: (context, transactions) {
         if (transactions.isEmpty) {
           return const Center(child: Text('No transactions yet.'));
