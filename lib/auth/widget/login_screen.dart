@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../service/auth_provider.dart';
-import '../../common/constants/shared_ui_constants.dart';
+import 'package:crypto_tracker/auth/service/auth_provider.dart';
+import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

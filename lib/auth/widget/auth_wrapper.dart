@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../service/auth_provider.dart';
-import '../../transaction/service/transaction_provider.dart';
-import '../../common/widget/home_screen.dart';
-import 'login_screen.dart';
+import 'package:crypto_tracker/auth/service/auth_provider.dart';
+import 'package:crypto_tracker/transaction/service/transaction_provider.dart';
+import 'package:crypto_tracker/common/widget/home_screen.dart';
+import 'package:crypto_tracker/auth/widget/login_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});

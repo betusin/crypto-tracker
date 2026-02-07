@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../model/transaction_model.dart';
-import '../service/transaction_provider.dart';
-import '../../auth/service/auth_provider.dart';
-import '../../price/service/price_service.dart';
-import '../../common/constants/shared_ui_constants.dart';
+import 'package:crypto_tracker/transaction/model/transaction_model.dart';
+import 'package:crypto_tracker/transaction/service/transaction_provider.dart';
+import 'package:crypto_tracker/auth/service/auth_provider.dart';
+import 'package:crypto_tracker/price/service/price_service.dart';
+import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});

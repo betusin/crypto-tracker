@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../model/transaction_model.dart';
+import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 
 class DatabaseService {
   // TODO(betka): create database repository

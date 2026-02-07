@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../model/transaction_model.dart';
-import 'database_service.dart';
-import '../../price/service/price_service.dart';
+import 'package:crypto_tracker/transaction/model/transaction_model.dart';
+import 'package:crypto_tracker/transaction/service/database_service.dart';
+import 'package:crypto_tracker/price/service/price_service.dart';
 
 class TransactionProvider with ChangeNotifier {
   List<TransactionModel> _transactions = [];

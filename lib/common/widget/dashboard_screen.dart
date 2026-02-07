@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../transaction/service/transaction_provider.dart';
-import 'summary_card.dart';
-import '../constants/shared_ui_constants.dart';
+import 'package:crypto_tracker/transaction/service/transaction_provider.dart';
+import 'package:crypto_tracker/common/widget/summary_card.dart';
+import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

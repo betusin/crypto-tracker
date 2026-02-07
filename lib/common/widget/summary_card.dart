@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/shared_ui_constants.dart';
+import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
 class SummaryCard extends StatelessWidget {
   const SummaryCard({super.key, required this.title, required this.value, this.valueColor});
