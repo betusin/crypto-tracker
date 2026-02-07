@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [const DashboardScreen(), TransactionListScreen()];
+  final List<Widget> _screens = [DashboardScreen(), TransactionListScreen()];
 
   void _onItemTapped(int index) {
     setState(() {
