@@ -1,3 +1,4 @@
+import 'package:crypto_tracker/common/model/reference_wrapper.dart';
 import 'package:flutter/material.dart';
 
 typedef WidgetBuilderWithData<T> = Widget Function(BuildContext context, T data);
@@ -22,6 +23,20 @@ class HandlingStreamBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTNullable = null is T;
+
+    if (isTNullable) {
+      return _buildHandle<ReferenceWrapper<T?>>(
+        stream: stream?.map(ReferenceWrapper.new),
+        builder: (context, lastWrappedValue) => builder(context, lastWrappedValue.wrapped as T),
+        initialData: initialData == null ? null : ReferenceWrapper(initialData),
+      );
+    }
+
+    return _buildHandle(stream: stream, builder: builder, initialData: initialData);
+  }
+
+  Widget _buildHandle<T>({Stream<T>? stream, required WidgetBuilderWithData<T> builder, T? initialData}) {
     return StreamBuilder<T>(
       stream: stream,
       initialData: initialData,
@@ -31,13 +46,12 @@ class HandlingStreamBuilder<T> extends StatelessWidget {
               Text('Unexpected error: ${snapshot.error} occurred. Please try again later.');
         }
 
-        final data = snapshot.data;
-
-        if (data == null) {
+        if (!snapshot.hasData) {
           return waitingForDataWidget ?? const Center(child: CircularProgressIndicator());
         }
 
-        return builder(context, data);
+        // ignore: null_check_on_nullable_type_parameter
+        return builder(context, snapshot.data!);
       },
     );
   }

@@ -9,12 +9,13 @@ class SignedInUserProvider {
   late final BehaviorSubject<User?> _userController;
   late final StreamSubscription<User?> _authStateSubscription;
 
-  Stream<User?> get userStream => _userController.stream;
+  late final Stream<User?> userStream = _userController.stream;
 
   User? get currentUser => _userController.valueOrNull;
 
   SignedInUserProvider(this._authService) {
-    _userController = BehaviorSubject<User?>.seeded(_authService.currentUser);
+    final currentUser = _authService.currentUser;
+    _userController = BehaviorSubject<User?>.seeded(currentUser);
     _authStateSubscription = _authService.authStateChanges.listen((User? user) => _setUser(user));
   }
 

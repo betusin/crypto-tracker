@@ -9,7 +9,7 @@ class AppRoot extends StatelessWidget {
     return MaterialApp(
       title: 'Crypto Tracker',
       theme: ThemeData(colorSchemeSeed: Colors.amber),
-      home: const AuthWrapper(),
+      home: AuthWrapper(),
     );
   }
 }
