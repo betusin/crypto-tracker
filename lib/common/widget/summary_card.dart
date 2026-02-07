@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/shared_ui_constants.dart';
 
 class SummaryCard extends StatelessWidget {
   const SummaryCard({super.key, required this.title, required this.value, this.valueColor});
@@ -18,7 +19,7 @@ class SummaryCard extends StatelessWidget {
         child: Column(
           children: [
             Text(title, style: TextStyle(fontSize: 16, color: colorScheme.onSurfaceVariant)),
-            const SizedBox(height: 10),
+            SMALL_GAP,
             Text(
               value,
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: valueColor),

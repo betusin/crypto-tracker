@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../service/auth_provider.dart';
+import '../../common/constants/shared_ui_constants.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -59,21 +60,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(20)),
                     child: Icon(Icons.currency_bitcoin, size: 80, color: colorScheme.primary),
                   ),
-                  const SizedBox(height: 40),
+                  LARGE_GAP,
 
                   // App Title
                   Text(
                     'Crypto Tracker',
                     style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
                   ),
-                  const SizedBox(height: 10),
+                  SMALL_GAP,
 
                   // Subtitle
                   Text(
                     'Track your crypto portfolio',
                     style: TextStyle(fontSize: 16, color: colorScheme.onPrimaryContainer),
                   ),
-                  const SizedBox(height: 60),
+                  EXTRA_LARGE_GAP,
 
                   // Sign In Button
                   SizedBox(
@@ -96,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           : const Text('Get Started', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  MEDIUM_GAP,
 
                   // Info Text
                   Text(

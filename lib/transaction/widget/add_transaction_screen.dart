@@ -5,6 +5,7 @@ import '../model/transaction_model.dart';
 import '../service/transaction_provider.dart';
 import '../../auth/service/auth_provider.dart';
 import '../../price/service/price_service.dart';
+import '../../common/constants/shared_ui_constants.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -182,7 +183,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                   IconButton(
                     icon: _isFetchingPrice
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        ? SizedBox(
+                            width: MEDIUM_GAP_SIZE,
+                            height: MEDIUM_GAP_SIZE,
+                            child: const CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Icon(Icons.download),
                     onPressed: _isFetchingPrice ? null : _fetchPrice,
                     tooltip: 'Fetch Current Price',
@@ -197,7 +202,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 onTap: () => _selectDate(context),
               ),
 
-              const SizedBox(height: 20),
+              MEDIUM_GAP,
 
               ElevatedButton(onPressed: _saveTransaction, child: const Text('Save Transaction')),
             ],

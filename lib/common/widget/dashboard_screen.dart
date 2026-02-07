@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../transaction/service/transaction_provider.dart';
 import 'summary_card.dart';
+import '../constants/shared_ui_constants.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -22,22 +23,22 @@ class DashboardScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             children: [
               SummaryCard(title: 'Total Portfolio Value', value: '€${totalValue.toStringAsFixed(2)}'),
-              const SizedBox(height: 16),
+              STANDARD_GAP,
               // TODO(betka): total profit should be calculated from transactions minus paid amount
               SummaryCard(
                 title: 'Total Profit / Loss',
                 value: '${isProfitPositive ? "+" : ""}€${totalProfit.toStringAsFixed(2)}',
                 valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
               ),
-              const SizedBox(height: 20),
+              MEDIUM_GAP,
               ElevatedButton.icon(
                 onPressed: () => provider.fetchCurrentPrices(),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Update Prices'),
               ),
-              const SizedBox(height: 20),
+              MEDIUM_GAP,
               const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
+              SMALL_GAP,
               ...provider.holdings.entries.map((entry) {
                 final cryptoId = entry.key;
                 final amount = entry.value;
