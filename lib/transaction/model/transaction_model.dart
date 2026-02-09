@@ -5,7 +5,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'transaction_model.g.dart';
 
-// TODO(betka): use serializable, identifiable
 @JsonSerializable()
 class TransactionModel extends IdentifiableSerializableBase {
   final String userId;
