@@ -5,13 +5,21 @@ class PageWrapper extends StatelessWidget {
   final String? title;
   final Widget? bottomNavigationBar;
   final Widget? floatingActionButton;
+  final List<Widget>? actions;
 
-  const PageWrapper({super.key, required this.child, this.title, this.bottomNavigationBar, this.floatingActionButton});
+  const PageWrapper({
+    super.key,
+    required this.child,
+    this.title,
+    this.bottomNavigationBar,
+    this.floatingActionButton,
+    this.actions,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: title == null ? null : AppBar(title: Text(title!)),
+      appBar: title == null ? null : AppBar(title: Text(title!), actions: actions),
       body: SafeArea(child: child),
       bottomNavigationBar: bottomNavigationBar,
       floatingActionButton: floatingActionButton,

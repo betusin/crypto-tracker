@@ -6,6 +6,7 @@ import 'package:crypto_tracker/price/service/current_price_controller.dart';
 import 'package:crypto_tracker/price/service/price_service.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/service/holding_service.dart';
+import 'package:crypto_tracker/transaction_import/service/transaction_importer.dart';
 import 'package:crypto_tracker/transaction/service/transaction_service.dart';
 import 'package:get_it/get_it.dart';
 
@@ -24,6 +25,7 @@ class IocContainer {
     getIt.registerSingleton(
       TransactionService(getIt<SignedInUserProvider>(), getIt<FirestoreRepository<TransactionModel>>()),
     );
+    getIt.registerSingleton(TransactionImporter(getIt<SignedInUserProvider>()));
     getIt.registerSingleton(CurrentPriceController(getIt<PriceService>()));
     getIt.registerSingleton(HoldingService(getIt<TransactionService>(), getIt<CurrentPriceController>()));
   }

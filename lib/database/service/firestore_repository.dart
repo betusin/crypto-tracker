@@ -16,8 +16,16 @@ class FirestoreRepository<T extends IdentifiableSerializable> {
             toFirestore: (model, _) => serializeDocument(model),
           );
 
+  WriteBatch _createBatch() => FirebaseFirestore.instance.batch();
+
   Future<void> add(T item) {
     return _collectionMappedReference.add(item);
+  }
+
+  Future<void> addAll(List<T> items) {
+    final batch = _createBatch();
+    items.forEach((item) => batch.set(_collectionMappedReference.doc(item.id), item));
+    return batch.commit();
   }
 
   Future<void> delete(String id) {

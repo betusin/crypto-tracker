@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:crypto_tracker/transaction/widget/add_transaction_screen.dart';
 import 'package:crypto_tracker/common/widget/dashboard_screen.dart';
 import 'package:crypto_tracker/transaction/widget/transaction_list.dart';
+import 'package:crypto_tracker/transaction_import/widget/transaction_import_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return PageWrapper(
       title: 'Crypto Tracker',
+      actions: _selectedIndex == 1 ? [const TransactionImportButton()] : null,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onAddTransaction(context),
         child: const Icon(Icons.add),
