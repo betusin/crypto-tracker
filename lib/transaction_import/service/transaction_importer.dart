@@ -9,109 +9,113 @@ import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 
 class TransactionImporter {
+  static const _dateColumn = 0;
+  static const _typeColumn = 1;
+  static const _amountColumn = 2;
+  static const _priceColumn = 3;
+
+  static const _cryptoCurrency = Cryptocurrency.bitcoin;
+  static const _startRowIndex = 4;
+
   final SignedInUserProvider _signedInUserProvider;
 
   TransactionImporter(this._signedInUserProvider);
 
   Future<List<TransactionModel>> importFromExcel(String filePath) async {
+    final userId = _signedInUserProvider.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('User not signed in');
+    }
+
+    final excel = await _decodeExcel(filePath);
+    final transactions = <TransactionModel>[];
+
+    for (final table in excel.tables.keys) {
+      final sheet = excel.tables[table];
+      if (sheet == null) {
+        continue;
+      }
+
+      transactions.addAll(_parseSheet(sheet, userId));
+    }
+
+    return transactions;
+  }
+
+  Future<Excel> _decodeExcel(String filePath) async {
     final file = File(filePath);
     if (!await file.exists()) {
       throw Exception('File not found: $filePath');
     }
 
     final bytes = await file.readAsBytes();
-    final excel = Excel.decodeBytes(bytes);
+    return Excel.decodeBytes(bytes);
+  }
+
+  List<TransactionModel> _parseSheet(Sheet sheet, String userId) {
     final transactions = <TransactionModel>[];
 
-    // TODO(betka): refactor this spaghetti code
-    // TODO(betka): handle errors with MaybeFailure or similar
-    for (final table in excel.tables.keys) {
-      final sheet = excel.tables[table];
-      if (sheet == null) continue;
+    for (int i = _startRowIndex; i < sheet.rows.length; i++) {
+      final row = sheet.rows[i];
+      if (row.isEmpty) continue;
 
-      // Start from 5th row (index 4)
-      for (int i = 4; i < sheet.rows.length; i++) {
-        final row = sheet.rows[i];
-        if (row.isEmpty) continue;
-
-        try {
-          // Date (Column 0)
-          final dateCell = row[0];
-          DateTime date;
-          if (dateCell == null) continue;
-
-          final dateValue = dateCell.value;
-          if (dateValue is DateTimeCellValue) {
-            date = DateTime(dateValue.year, dateValue.month, dateValue.day, dateValue.hour, dateValue.minute);
-          } else if (dateValue is DateCellValue) {
-            date = DateTime(dateValue.year, dateValue.month, dateValue.day);
-          } else if (dateValue is TextCellValue) {
-            date = DateTime.parse(dateValue.value.text ?? '');
-          } else {
-            debugPrint('Row $i: Unknown date cell type: ${dateValue.runtimeType}');
-            continue;
-          }
-
-          // Type (Column 1)
-          final typeCell = row[1];
-          if (typeCell == null) continue;
-          String typeString = '';
-          final typeValue = typeCell.value;
-          if (typeValue is TextCellValue) {
-            typeString = typeValue.value.text?.toLowerCase() ?? '';
-          } else {
-            typeString = typeValue.toString().toLowerCase();
-          }
-          final type = typeString.contains('buy') ? TransactionType.buy : TransactionType.sell;
-
-          // BTC Amount (Column 2)
-          final amountCell = row[2];
-          double amount = 0.0;
-          if (amountCell != null) {
-            final val = amountCell.value;
-            if (val is DoubleCellValue) {
-              amount = val.value;
-            } else if (val is IntCellValue) {
-              amount = val.value.toDouble();
-            } else if (val is TextCellValue) {
-              amount = double.tryParse(val.value.text ?? '') ?? 0.0;
-            }
-          }
-
-          // EUR Spent (Column 3)
-          final eurCell = row[3];
-          double price = 0.0;
-          if (eurCell != null) {
-            final val = eurCell.value;
-            if (val is DoubleCellValue) {
-              price = val.value;
-            } else if (val is IntCellValue) {
-              price = val.value.toDouble();
-            } else if (val is TextCellValue) {
-              price = double.tryParse(val.value.text ?? '') ?? 0.0;
-            }
-          }
-
-          final userId = _signedInUserProvider.currentUser?.uid;
-          if (userId == null) throw Exception('User not signed in');
-
-          final transaction = TransactionModel(
-            id: generateId(),
-            userId: userId,
-            cryptoCurrency: Cryptocurrency.bitcoin,
-            type: type,
-            amount: amount.abs(),
-            pricePerUnit: price,
-            date: date,
-          );
-
+      try {
+        final transaction = _parseRow(row, userId);
+        if (transaction != null) {
           transactions.add(transaction);
-        } catch (e) {
-          debugPrint('Error parsing row $i: $e');
         }
+      } catch (e) {
+        debugPrint('Error parsing row $i: $e');
       }
     }
 
     return transactions;
+  }
+
+  TransactionModel? _parseRow(List<Data?> row, String userId) {
+    final date = _parseDate(row[_dateColumn]?.value);
+    if (date == null) {
+      return null;
+    }
+
+    final type = _parseType(row[_typeColumn]?.value);
+    final amount = _cellValueToDouble(row[_amountColumn]?.value);
+    final price = _cellValueToDouble(row[_priceColumn]?.value);
+
+    return TransactionModel(
+      id: generateId(),
+      userId: userId,
+      cryptoCurrency: _cryptoCurrency,
+      type: type,
+      amount: amount.abs(),
+      pricePerUnit: price,
+      date: date,
+    );
+  }
+
+  DateTime? _parseDate(CellValue? value) {
+    return switch (value) {
+      DateCellValue() => DateTime(value.year, value.month, value.day),
+      TextCellValue() => DateTime.tryParse(value.value.text ?? ''),
+      _ => null,
+    };
+  }
+
+  TransactionType _parseType(CellValue? value) {
+    final typeString = switch (value) {
+      TextCellValue() => value.value.text?.toLowerCase() ?? '',
+      _ => value?.toString().toLowerCase() ?? '',
+    };
+
+    return typeString.contains('buy') ? TransactionType.buy : TransactionType.sell;
+  }
+
+  double _cellValueToDouble(CellValue? value) {
+    return switch (value) {
+      DoubleCellValue() => value.value,
+      IntCellValue() => value.value.toDouble(),
+      TextCellValue() => double.tryParse(value.value.text ?? '') ?? 0.0,
+      _ => 0.0,
+    };
   }
 }
