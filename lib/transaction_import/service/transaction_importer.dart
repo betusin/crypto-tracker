@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
+import 'package:crypto_tracker/common/model/failable_result.dart';
 import 'package:crypto_tracker/common/util/id_generator.dart';
 import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
+import 'package:crypto_tracker/transaction_import/model/transaction_import_error.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
 
@@ -21,13 +23,19 @@ class TransactionImporter {
 
   TransactionImporter(this._signedInUserProvider);
 
-  Future<List<TransactionModel>> importFromExcel(String filePath) async {
+  Future<FailableResult<List<TransactionModel>, TransactionImportError>> importFromExcel(String filePath) async {
     final userId = _signedInUserProvider.currentUser?.uid;
     if (userId == null) {
-      throw Exception('User not signed in');
+      return FailableResult.failure(TransactionImportError.userNotSignedIn);
     }
 
-    final excel = await _decodeExcel(filePath);
+    final Excel excel;
+    try {
+      excel = await _decodeExcel(filePath);
+    } catch (e) {
+      return FailableResult.failure(TransactionImportError.fileNotFound);
+    }
+
     final transactions = <TransactionModel>[];
 
     for (final table in excel.tables.keys) {
@@ -39,7 +47,11 @@ class TransactionImporter {
       transactions.addAll(_parseSheet(sheet, userId));
     }
 
-    return transactions;
+    if (transactions.isEmpty) {
+      return FailableResult.failure(TransactionImportError.noDataFound);
+    }
+
+    return FailableResult.success(transactions);
   }
 
   Future<Excel> _decodeExcel(String filePath) async {
