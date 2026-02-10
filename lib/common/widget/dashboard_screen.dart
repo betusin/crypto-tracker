@@ -31,7 +31,7 @@ class DashboardScreen extends StatelessWidget {
               SummaryCard(title: 'Total Portfolio Value', value: '€${data.totalPortfolioValue.toStringAsFixed(2)}'),
               STANDARD_GAP,
               SummaryCard(
-                title: 'Total Profit / Loss',
+                title: 'Total ${isProfitPositive ? 'Profit' : 'Loss'}',
                 value: '${isProfitPositive ? "+" : ""} €${data.totalProfit.toStringAsFixed(2)}',
                 valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
               ),

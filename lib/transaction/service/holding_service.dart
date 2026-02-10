@@ -35,15 +35,14 @@ class HoldingService {
         Map<Cryptocurrency, double> holdings = {};
 
         for (final transaction in transactions) {
-          final price = currentPrices[transaction.cryptoCurrency] ?? 0;
+          final currentPrice = currentPrices[transaction.cryptoCurrency] ?? 0;
 
-          final perUnitPrice = transaction.pricePerUnit;
-          final amount = transaction.type == TransactionType.buy ? transaction.amount : -transaction.amount;
-          final value = amount * price;
-          final profit = value - perUnitPrice;
+          final amount = transaction.amount * (transaction.type == TransactionType.buy ? 1 : -1);
+          final valueInFiat = amount * currentPrice;
+          final profit = valueInFiat + transaction.pricePerUnit;
 
           totalProfit += profit;
-          totalPortfolioValue += value;
+          totalPortfolioValue += valueInFiat;
           holdings[transaction.cryptoCurrency] = (holdings[transaction.cryptoCurrency] ?? 0) + amount;
         }
 
