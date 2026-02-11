@@ -176,7 +176,9 @@ class _AddOrUpdateTransactionScreenState extends State<AddOrUpdateTransactionScr
       initialValue: _selectedCryptoCurrency,
       decoration: const InputDecoration(labelText: 'Cryptocurrency'),
       items: Cryptocurrency.values
-          .map((crypto) => DropdownMenuItem(value: crypto, child: Text('${crypto.value} (${crypto.symbol})')))
+          .map(
+            (crypto) => DropdownMenuItem(value: crypto, child: Text('${crypto.value.capitalize()} (${crypto.symbol})')),
+          )
           .toList(),
       onChanged: (Cryptocurrency? newValue) =>
           newValue == null ? null : setState(() => _selectedCryptoCurrency = newValue),
