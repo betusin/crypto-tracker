@@ -16,7 +16,7 @@ TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
         json['cryptoCurrency'],
       ),
       amount: (json['amount'] as num).toDouble(),
-      pricePerUnit: (json['pricePerUnit'] as num).toDouble(),
+      priceInEur: (json['priceInEur'] as num).toDouble(),
       date: DateTime.parse(json['date'] as String),
     );
 
@@ -27,7 +27,7 @@ Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
       'type': _$TransactionTypeEnumMap[instance.type]!,
       'cryptoCurrency': _$CryptocurrencyEnumMap[instance.cryptoCurrency]!,
       'amount': instance.amount,
-      'pricePerUnit': instance.pricePerUnit,
+      'priceInEur': instance.priceInEur,
       'date': instance.date.toIso8601String(),
     };
 

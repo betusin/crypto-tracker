@@ -39,7 +39,7 @@ class _AddOrUpdateTransactionScreenState extends State<AddOrUpdateTransactionScr
   void initState() {
     super.initState();
     _amountController = TextEditingController(text: widget.transaction?.amount.toString());
-    _priceController = TextEditingController(text: widget.transaction?.pricePerUnit.toString());
+    _priceController = TextEditingController(text: widget.transaction?.priceInEur.toString());
     _type = widget.transaction?.type ?? TransactionType.buy;
     _selectedCryptoCurrency = widget.transaction?.cryptoCurrency ?? Cryptocurrency.bitcoin;
     _selectedDate = widget.transaction?.date ?? DateTime.now();
@@ -79,7 +79,7 @@ class _AddOrUpdateTransactionScreenState extends State<AddOrUpdateTransactionScr
         type: _type,
         cryptoCurrency: _selectedCryptoCurrency,
         amount: double.parse(_amountController.text),
-        pricePerUnit: double.parse(_priceController.text),
+        priceInEur: double.parse(_priceController.text),
         date: _selectedDate,
       );
 

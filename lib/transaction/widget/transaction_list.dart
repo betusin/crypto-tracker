@@ -76,7 +76,7 @@ class TransactionList extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color),
           ),
           Text(
-            '€${transaction.pricePerUnit.toStringAsFixed(2)}',
+            '€${transaction.priceInEur.toStringAsFixed(2)}',
             style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
           ),
         ],

@@ -40,7 +40,7 @@ class HoldingService {
           final sign = (transaction.type == TransactionType.buy ? 1 : -1);
           final amount = transaction.amount * sign;
           final valueInFiat = amount * currentPrice;
-          final profit = valueInFiat - (transaction.pricePerUnit * sign);
+          final profit = valueInFiat - (transaction.priceInEur * sign);
 
           totalProfit += profit;
           totalPortfolioValue += valueInFiat;

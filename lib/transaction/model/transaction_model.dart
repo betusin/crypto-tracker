@@ -11,7 +11,7 @@ class TransactionModel extends IdentifiableSerializableBase {
   final TransactionType type;
   final Cryptocurrency cryptoCurrency;
   final double amount;
-  final double pricePerUnit;
+  final double priceInEur;
   final DateTime date;
 
   TransactionModel({
@@ -20,7 +20,7 @@ class TransactionModel extends IdentifiableSerializableBase {
     required this.type,
     required this.cryptoCurrency,
     required this.amount,
-    required this.pricePerUnit,
+    required this.priceInEur,
     required this.date,
   });
 
