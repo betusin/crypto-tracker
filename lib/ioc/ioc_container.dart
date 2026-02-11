@@ -1,5 +1,7 @@
 import 'package:crypto_tracker/auth/service/auth_service.dart';
 import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
+import 'package:crypto_tracker/common/service/refetch_service.dart';
+import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/database/util/collection_names.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
@@ -26,7 +28,10 @@ class IocContainer {
       TransactionService(getIt<SignedInUserProvider>(), getIt<FirestoreRepository<TransactionModel>>()),
     );
     getIt.registerSingleton(TransactionImporter(getIt<SignedInUserProvider>()));
-    getIt.registerSingleton(CurrentPriceController(getIt<PriceService>()));
+    getIt.registerSingleton(
+      Refetcher<Map<Cryptocurrency, double>>(fetchFunction: getIt<PriceService>().fetchCurrentPrices),
+    );
+    getIt.registerSingleton(CurrentPriceController(getIt<Refetcher<Map<Cryptocurrency, double>>>()));
     getIt.registerSingleton(HoldingService(getIt<TransactionService>(), getIt<CurrentPriceController>()));
   }
 }

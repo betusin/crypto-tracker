@@ -1,20 +1,14 @@
+import 'package:crypto_tracker/common/service/refetch_service.dart';
 import 'package:crypto_tracker/currency/model/cryptocureny.dart';
-import 'package:crypto_tracker/price/service/price_service.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter/material.dart';
 
 class CurrentPriceController {
-  final PriceService _priceService;
+  final Refetcher<Map<Cryptocurrency, double>> _refetcher;
 
-  CurrentPriceController(this._priceService) {
-    fetchCurrentPrices();
-  }
+  CurrentPriceController(this._refetcher);
 
-  final _currentPrices = BehaviorSubject<Map<Cryptocurrency, double>>();
+  Stream<Map<Cryptocurrency, double>> observeCurrentPrices() =>
+      _refetcher.stream.handleError((error) => debugPrint('Error: $error'));
 
-  Stream<Map<Cryptocurrency, double>> observeCurrentPrices() => _currentPrices.stream;
-
-  // TODO(betka): implement it so that it automatically refetches every 30 seconds
-  Future<void> fetchCurrentPrices() async {
-    _currentPrices.add(await _priceService.fetchCurrentPrices());
-  }
+  Future<void> fetchCurrentPrices() => _refetcher.refetch();
 }
