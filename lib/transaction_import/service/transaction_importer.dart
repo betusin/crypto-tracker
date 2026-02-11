@@ -8,7 +8,8 @@ import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:crypto_tracker/transaction_import/model/transaction_import_error.dart';
 import 'package:excel/excel.dart';
-import 'package:flutter/foundation.dart';
+
+typedef ImportResult = FailableResult<List<TransactionModel>, TransactionImportError>;
 
 class TransactionImporter {
   static const _dateColumn = 0;
@@ -23,7 +24,7 @@ class TransactionImporter {
 
   TransactionImporter(this._signedInUserProvider);
 
-  Future<FailableResult<List<TransactionModel>, TransactionImportError>> importFromExcel(String filePath) async {
+  Future<ImportResult> importFromExcel(String filePath) async {
     final userId = _signedInUserProvider.currentUser?.uid;
     if (userId == null) {
       return FailableResult.failure(TransactionImportError.userNotSignedIn);
@@ -71,13 +72,9 @@ class TransactionImporter {
       final row = sheet.rows[i];
       if (row.isEmpty) continue;
 
-      try {
-        final transaction = _parseRow(row, userId);
-        if (transaction != null) {
-          transactions.add(transaction);
-        }
-      } catch (e) {
-        debugPrint('Error parsing row $i: $e');
+      final transaction = _parseRow(row, userId);
+      if (transaction != null) {
+        transactions.add(transaction);
       }
     }
 
@@ -93,6 +90,10 @@ class TransactionImporter {
     final type = _parseType(row[_typeColumn]?.value);
     final amount = _cellValueToDouble(row[_amountColumn]?.value);
     final price = _cellValueToDouble(row[_priceColumn]?.value);
+
+    if (type == null || amount == null || price == null) {
+      return null;
+    }
 
     return TransactionModel(
       id: generateId(),
@@ -113,21 +114,25 @@ class TransactionImporter {
     };
   }
 
-  TransactionType _parseType(CellValue? value) {
-    final typeString = switch (value) {
-      TextCellValue() => value.value.text?.toLowerCase() ?? '',
-      _ => value?.toString().toLowerCase() ?? '',
+  TransactionType? _parseType(CellValue? cellValue) {
+    final typeString = switch (cellValue) {
+      TextCellValue() => cellValue.value.text?.toLowerCase() ?? '',
+      _ => cellValue?.toString().toLowerCase() ?? '',
     };
 
-    return typeString.contains('buy') ? TransactionType.buy : TransactionType.sell;
+    return switch (typeString) {
+      'buy' => TransactionType.buy,
+      'sell' => TransactionType.sell,
+      _ => null,
+    };
   }
 
-  double _cellValueToDouble(CellValue? value) {
-    return switch (value) {
-      DoubleCellValue() => value.value,
-      IntCellValue() => value.value.toDouble(),
-      TextCellValue() => double.tryParse(value.value.text ?? '') ?? 0.0,
-      _ => 0.0,
+  double? _cellValueToDouble(CellValue? cellValue) {
+    return switch (cellValue) {
+      DoubleCellValue() => cellValue.value,
+      IntCellValue() => cellValue.value.toDouble(),
+      TextCellValue() => double.tryParse(cellValue.value.text ?? ''),
+      _ => null,
     };
   }
 }
