@@ -22,42 +22,47 @@ class DashboardScreen extends StatelessWidget {
       onRefresh: () => _currentPriceController.fetchCurrentPrices(),
       child: HandlingStreamBuilder<PortfolioSummary>(
         stream: _holdingService.portfolioSummaryStream(),
-        builder: (context, data) {
-          final isProfitPositive = data.totalProfit >= 0;
-
-          return ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              SummaryCard(title: 'Total Portfolio Value', value: '€${data.totalPortfolioValue.toStringAsFixed(2)}'),
-              STANDARD_GAP,
-              SummaryCard(
-                title: 'Total ${isProfitPositive ? 'Profit' : 'Loss'}',
-                value: '${isProfitPositive ? "+" : ""} €${data.totalProfit.toStringAsFixed(2)}',
-                valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
-              ),
-              // TODO(betka): display current prices of cryptocurrencies - maybe selector for which crypto to display
-              MEDIUM_GAP,
-              const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SMALL_GAP,
-              ...data.holdings.entries.map((entry) {
-                final cryptoCurrency = entry.key;
-                final amount = entry.value;
-                final currentPrice = data.currentPrices[cryptoCurrency] ?? 0;
-                final valueInEur = amount * currentPrice;
-
-                // Only show if amount is not 0 (or very close to 0)
-                if (amount.abs() < 0.000001) return const SizedBox.shrink();
-
-                return ListTile(
-                  title: Text(cryptoCurrency.value.capitalize()),
-                  subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoCurrency.symbol}'),
-                  trailing: Text('€${valueInEur.toStringAsFixed(2)}', style: TextStyle(fontSize: 16)),
-                );
-              }),
-            ],
-          );
-        },
+        builder: (context, data) => _buildContent(data, colorScheme),
       ),
     );
+  }
+
+  ListView _buildContent(PortfolioSummary data, ColorScheme colorScheme) {
+    final isProfitPositive = data.totalProfit >= 0;
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        SummaryCard(title: 'Total Portfolio Value', value: '€${data.totalPortfolioValue.toStringAsFixed(2)}'),
+        STANDARD_GAP,
+        SummaryCard(
+          title: 'Total ${isProfitPositive ? 'Profit' : 'Loss'}',
+          value: '${isProfitPositive ? "+" : ""} €${data.totalProfit.toStringAsFixed(2)}',
+          valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
+        ),
+        // TODO(betka): maybe display current prices of cryptocurrencies - maybe selector for which crypto to display
+        MEDIUM_GAP,
+        const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        SMALL_GAP,
+        ..._buildHoldingsList(data),
+      ],
+    );
+  }
+
+  Iterable<Widget> _buildHoldingsList(PortfolioSummary data) {
+    return data.holdings.entries.map((entry) {
+      final cryptoCurrency = entry.key;
+      final amount = entry.value;
+      final currentPrice = data.currentPrices[cryptoCurrency] ?? 0;
+      final valueInEur = amount * currentPrice;
+
+      // Only show if amount is not 0 (or very close to 0)
+      if (amount.abs() < 0.000001) return const SizedBox.shrink();
+
+      return ListTile(
+        title: Text(cryptoCurrency.value.capitalize()),
+        subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoCurrency.symbol}'),
+        trailing: Text('€${valueInEur.toStringAsFixed(2)}', style: TextStyle(fontSize: 16)),
+      );
+    });
   }
 }
