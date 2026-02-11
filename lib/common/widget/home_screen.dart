@@ -1,6 +1,6 @@
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:crypto_tracker/transaction/widget/add_transaction_screen.dart';
+import 'package:crypto_tracker/transaction/widget/add_or_update_transaction_screen.dart';
 import 'package:crypto_tracker/common/widget/dashboard_screen.dart';
 import 'package:crypto_tracker/transaction/widget/transaction_list.dart';
 import 'package:crypto_tracker/transaction_import/widget/transaction_import_button.dart';
@@ -45,5 +45,5 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<dynamic> _onAddTransaction(BuildContext context) =>
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const AddTransactionScreen()));
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const AddOrUpdateTransactionScreen()));
 }

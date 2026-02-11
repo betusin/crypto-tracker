@@ -5,6 +5,7 @@ import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:crypto_tracker/transaction/service/transaction_service.dart';
+import 'package:crypto_tracker/transaction/widget/add_or_update_transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -44,11 +45,17 @@ class TransactionList extends StatelessWidget {
         _transactionRepository.delete(transaction.id);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Transaction deleted')));
       },
-      child: _buildItem(colorScheme, transaction),
+      child: _buildItem(context, colorScheme, transaction),
     );
   }
 
-  Widget _buildItem(ColorScheme colorScheme, TransactionModel transaction) {
+  void _editTransaction(BuildContext context, TransactionModel transaction) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => AddOrUpdateTransactionScreen(transaction: transaction)));
+  }
+
+  Widget _buildItem(BuildContext context, ColorScheme colorScheme, TransactionModel transaction) {
     final isBuy = transaction.type == TransactionType.buy;
     final color = isBuy ? colorScheme.secondary : colorScheme.error;
 
@@ -59,6 +66,7 @@ class TransactionList extends StatelessWidget {
       ),
       title: Text('${transaction.cryptoCurrency.value.capitalize()} ${isBuy ? "Buy" : "Sell"}'),
       subtitle: Text(DateFormat('yyyy-MM-dd').format(transaction.date)),
+      onTap: () => _editTransaction(context, transaction),
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,

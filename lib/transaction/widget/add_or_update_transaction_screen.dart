@@ -1,4 +1,5 @@
 import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
+import 'package:crypto_tracker/common/extension/string_extension.dart';
 import 'package:crypto_tracker/common/util/id_generator.dart';
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
 import 'package:crypto_tracker/currency/model/cryptocureny.dart';
@@ -10,25 +11,39 @@ import 'package:intl/intl.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
-class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+class AddOrUpdateTransactionScreen extends StatefulWidget {
+  final TransactionModel? transaction;
+
+  const AddOrUpdateTransactionScreen({super.key, this.transaction});
 
   @override
-  State<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  State<AddOrUpdateTransactionScreen> createState() => _AddOrUpdateTransactionScreenState();
 }
 
-class _AddTransactionScreenState extends State<AddTransactionScreen> {
+class _AddOrUpdateTransactionScreenState extends State<AddOrUpdateTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _signedInUserProvider = getIt<SignedInUserProvider>();
   final _transactionRepository = getIt<FirestoreRepository<TransactionModel>>();
 
-  final _amountController = TextEditingController();
-  final _priceController = TextEditingController();
+  late final TextEditingController _amountController;
+  late final TextEditingController _priceController;
 
-  TransactionType _type = TransactionType.buy;
-  Cryptocurrency _selectedCryptoCurrency = Cryptocurrency.bitcoin;
-  DateTime _selectedDate = DateTime.now();
+  late TransactionType _type;
+  late Cryptocurrency _selectedCryptoCurrency;
+  late DateTime _selectedDate;
+
+  bool get _isEditing => widget.transaction != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController(text: widget.transaction?.amount.toString());
+    _priceController = TextEditingController(text: widget.transaction?.pricePerUnit.toString());
+    _type = widget.transaction?.type ?? TransactionType.buy;
+    _selectedCryptoCurrency = widget.transaction?.cryptoCurrency ?? Cryptocurrency.bitcoin;
+    _selectedDate = widget.transaction?.date ?? DateTime.now();
+  }
 
   @override
   void dispose() {
@@ -59,7 +74,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
 
       final transaction = TransactionModel(
-        id: generateId(),
+        id: widget.transaction?.id ?? generateId(),
         userId: userId,
         type: _type,
         cryptoCurrency: _selectedCryptoCurrency,
@@ -68,7 +83,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         date: _selectedDate,
       );
 
-      _transactionRepository.add(transaction);
+      if (_isEditing) {
+        _transactionRepository.set(transaction.id, transaction.toJson());
+      } else {
+        _transactionRepository.add(transaction);
+      }
 
       Navigator.pop(context);
     }
@@ -77,7 +96,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     return PageWrapper(
-      title: 'Add Transaction',
+      title: _isEditing ? 'Update Transaction' : 'Add Transaction',
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -90,7 +109,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               _buildPriceField(),
               _buildDateSelector(context),
               MEDIUM_GAP,
-              ElevatedButton(onPressed: _saveTransaction, child: const Text('Save Transaction')),
+              ElevatedButton(
+                onPressed: _saveTransaction,
+                child: Text(_isEditing ? 'Update Transaction' : 'Save Transaction'),
+              ),
             ],
           ),
         ),
@@ -151,7 +173,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   Widget _buildCryptoSelector() {
     return DropdownButtonFormField<Cryptocurrency>(
-      initialValue: Cryptocurrency.bitcoin,
+      initialValue: _selectedCryptoCurrency,
       decoration: const InputDecoration(labelText: 'Cryptocurrency'),
       items: Cryptocurrency.values
           .map((crypto) => DropdownMenuItem(value: crypto, child: Text('${crypto.value} (${crypto.symbol})')))
@@ -162,7 +184,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   Widget _buildTransactionTypeRadios() {
-    return RadioGroup(
+    return RadioGroup<TransactionType>(
       groupValue: _type,
       onChanged: (TransactionType? value) => value == null ? null : _setTransactionType(value),
       child: Row(children: TransactionType.values.map(_buildTransactionRadio).toList()),
@@ -174,8 +196,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget _buildTransactionRadio(TransactionType transactionType) {
     return Expanded(
       child: ListTile(
-        // TODO(betka): use capitalize extension
-        title: Text(transactionType.name),
+        title: Text(transactionType.name.capitalize()),
         leading: Radio<TransactionType>(toggleable: true, value: transactionType),
         onTap: () => _setTransactionType(transactionType),
       ),
