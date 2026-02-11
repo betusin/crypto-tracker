@@ -101,7 +101,7 @@ class TransactionImporter {
       cryptoCurrency: _cryptoCurrency,
       type: type,
       amount: amount.abs(),
-      pricePerUnit: price,
+      pricePerUnit: price.abs(),
       date: date,
     );
   }

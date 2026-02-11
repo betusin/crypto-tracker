@@ -37,9 +37,10 @@ class HoldingService {
         for (final transaction in transactions) {
           final currentPrice = currentPrices[transaction.cryptoCurrency] ?? 0;
 
-          final amount = transaction.amount * (transaction.type == TransactionType.buy ? 1 : -1);
+          final sign = (transaction.type == TransactionType.buy ? 1 : -1);
+          final amount = transaction.amount * sign;
           final valueInFiat = amount * currentPrice;
-          final profit = valueInFiat + transaction.pricePerUnit;
+          final profit = valueInFiat - (transaction.pricePerUnit * sign);
 
           totalProfit += profit;
           totalPortfolioValue += valueInFiat;
