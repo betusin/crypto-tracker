@@ -14,7 +14,9 @@ class TransactionService {
       if (user == null) {
         return Stream.value([]);
       }
-      return _transactionRepository.observeByQuery((collection) => collection.where('userId', isEqualTo: user.uid));
+      return _transactionRepository.observeByQuery(
+        (collection) => collection.orderBy('date', descending: true).where('userId', isEqualTo: user.uid),
+      );
     });
   }
 
