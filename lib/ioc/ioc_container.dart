@@ -29,7 +29,10 @@ class IocContainer {
     );
     getIt.registerSingleton(TransactionImporter(getIt<SignedInUserProvider>()));
     getIt.registerSingleton(
-      Refetcher<Map<Cryptocurrency, double>>(fetchFunction: getIt<PriceService>().fetchCurrentPrices),
+      Refetcher<Map<Cryptocurrency, double>>(
+        fetchFunction: getIt<PriceService>().fetchCurrentPrices,
+        interval: Duration(seconds: 30),
+      ),
     );
     getIt.registerSingleton(CurrentPriceController(getIt<Refetcher<Map<Cryptocurrency, double>>>()));
     getIt.registerSingleton(HoldingService(getIt<TransactionService>(), getIt<CurrentPriceController>()));
