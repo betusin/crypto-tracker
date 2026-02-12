@@ -7,7 +7,7 @@ import 'package:crypto_tracker/database/util/collection_names.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
 import 'package:crypto_tracker/price/service/price_service.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
-import 'package:crypto_tracker/transaction/service/holding_service.dart';
+import 'package:crypto_tracker/portfolio/service/holding_service.dart';
 import 'package:crypto_tracker/transaction_import/service/transaction_importer.dart';
 import 'package:crypto_tracker/transaction/service/transaction_service.dart';
 import 'package:get_it/get_it.dart';
