@@ -1,7 +1,7 @@
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto_tracker/transaction/widget/add_or_update_transaction_screen.dart';
-import 'package:crypto_tracker/common/widget/dashboard_screen.dart';
+import 'package:crypto_tracker/portfolio/widget/dashboard_screen.dart';
 import 'package:crypto_tracker/transaction/widget/transaction_list.dart';
 import 'package:crypto_tracker/transaction_import/widget/transaction_import_button.dart';
 
