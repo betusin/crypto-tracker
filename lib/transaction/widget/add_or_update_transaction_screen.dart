@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
+import 'package:crypto_tracker/common/widget/double_form_field.dart';
 
 class AddOrUpdateTransactionScreen extends StatefulWidget {
   final TransactionModel? transaction;
@@ -105,8 +106,8 @@ class _AddOrUpdateTransactionScreenState extends State<AddOrUpdateTransactionScr
             children: [
               _buildTransactionTypeRadios(),
               _buildCryptoSelector(),
-              _buildAmountField(),
-              _buildPriceField(),
+              DoubleFormField(controller: _amountController, labelText: 'Amount (${_selectedCryptoCurrency.symbol})'),
+              DoubleFormField(controller: _priceController, labelText: 'Price per Unit (EUR)'),
               _buildDateSelector(context),
               MEDIUM_GAP,
               ElevatedButton(
@@ -133,41 +134,6 @@ class _AddOrUpdateTransactionScreenState extends State<AddOrUpdateTransactionScr
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildPriceField() {
-    return TextFormField(
-      controller: _priceController,
-      decoration: const InputDecoration(labelText: 'Price per Unit (EUR)'),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      validator: (value) {
-        // TODO(betka): extract to a reusable validator and reuse here and below, it could also be a DoubleFormField or similar
-        if (value == null || value.isEmpty) {
-          return 'Please enter a price';
-        }
-        if (double.tryParse(value) == null) {
-          return 'Please enter a valid number';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildAmountField() {
-    return TextFormField(
-      controller: _amountController,
-      decoration: InputDecoration(labelText: 'Amount (${_selectedCryptoCurrency.symbol})'),
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter an amount';
-        }
-        if (double.tryParse(value) == null) {
-          return 'Please enter a valid number';
-        }
-        return null;
-      },
     );
   }
 
