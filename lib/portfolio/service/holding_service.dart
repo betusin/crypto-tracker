@@ -1,6 +1,6 @@
 import 'package:crypto_tracker/currency/model/cryptocureny.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
-import 'package:crypto_tracker/transaction/model/portfolio_summary.dart';
+import 'package:crypto_tracker/portfolio/model/portfolio_summary.dart';
 import 'package:crypto_tracker/transaction/model/transaction_type.dart';
 import 'package:crypto_tracker/transaction/service/transaction_service.dart';
 import 'package:rxdart/rxdart.dart';
@@ -11,8 +11,7 @@ class HoldingService {
 
   HoldingService(this._transactionService, this._currentPriceController);
 
-  /// Returns Stream of current holdings grouped by Cryptocurrency
-  Stream<Map<Cryptocurrency, double>> holdingsStream() {
+  Stream<Map<Cryptocurrency, double>> holdingsByCryprocurrencyStream() {
     return _transactionService.observeTransactionsForCurrentUser().map((transactions) {
       Map<Cryptocurrency, double> holdings = {};
 
@@ -24,7 +23,6 @@ class HoldingService {
     });
   }
 
-  /// Returns Stream of current holdings and prices grouped by Cryptocurrency, total profit and total portfolio value
   Stream<PortfolioSummary> portfolioSummaryStream() {
     return Rx.combineLatest2(
       _transactionService.observeTransactionsForCurrentUser(),

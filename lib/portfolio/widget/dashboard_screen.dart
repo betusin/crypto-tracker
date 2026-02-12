@@ -2,9 +2,9 @@ import 'package:crypto_tracker/common/extension/string_extension.dart';
 import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
-import 'package:crypto_tracker/transaction/model/portfolio_summary.dart';
+import 'package:crypto_tracker/portfolio/model/portfolio_summary.dart';
 import 'package:flutter/material.dart';
-import 'package:crypto_tracker/transaction/service/holding_service.dart';
+import 'package:crypto_tracker/portfolio/service/holding_service.dart';
 import 'package:crypto_tracker/common/widget/summary_card.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 
