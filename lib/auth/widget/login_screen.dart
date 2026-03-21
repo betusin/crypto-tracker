@@ -16,14 +16,17 @@ class _LoginScreenState extends State<LoginScreen> {
   final _authService = getIt<AuthService>();
   bool _isLoading = false;
 
-  Future<void> _signInAnonymously() async {
+  Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.signInAnonymously();
+      final credential = await _authService.signInWithGoogle();
+      if (credential == null) {
+        return;
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to sign in: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to sign in.')));
       }
     } finally {
       if (mounted) {
@@ -74,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _signInAnonymously,
+        onPressed: _isLoading ? null : _signInWithGoogle,
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.surface,
           foregroundColor: colorScheme.primary,
@@ -87,7 +90,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: 24,
                 child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
               )
-            : const Text('Get Started', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.login),
+                  SMALL_GAP,
+                  const Text('Sign in with Google', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ],
+              ),
       ),
     );
   }

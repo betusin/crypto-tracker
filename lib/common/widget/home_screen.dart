@@ -1,4 +1,6 @@
+import 'package:crypto_tracker/auth/service/auth_service.dart';
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
+import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
 import 'package:crypto_tracker/transaction/widget/add_or_update_transaction_screen.dart';
 import 'package:crypto_tracker/portfolio/widget/dashboard_screen.dart';
@@ -13,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _authService = getIt<AuthService>();
+
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [DashboardScreen(), TransactionList()];
@@ -23,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return PageWrapper(
       title: 'Crypto Tracker',
-      actions: _selectedIndex == 1 ? [const TransactionImportButton()] : null,
+      actions: _buildActions(),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onAddTransaction(context),
         child: const Icon(Icons.add),
@@ -31,6 +35,14 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _buildBottomNavigationBar(),
       child: _screens[_selectedIndex],
     );
+  }
+
+  List<Widget>? _buildActions() {
+    return switch (_selectedIndex) {
+      0 => [IconButton(onPressed: _authService.signOut, icon: const Icon(Icons.logout))],
+      1 => [const TransactionImportButton()],
+      _ => null,
+    };
   }
 
   Widget _buildBottomNavigationBar() {
