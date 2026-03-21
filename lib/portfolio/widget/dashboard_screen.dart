@@ -60,8 +60,8 @@ class DashboardScreen extends StatelessWidget {
 
       return ListTile(
         title: Text(cryptoCurrency.value.capitalize()),
-        subtitle: Text('${amount.toStringAsFixed(4)} ${cryptoCurrency.symbol}'),
-        trailing: Text('€${valueInEur.toStringAsFixed(2)}', style: TextStyle(fontSize: 16)),
+        subtitle: Text('€${valueInEur.toStringAsFixed(2)} • ${amount.toStringAsFixed(4)} ${cryptoCurrency.symbol}'),
+        trailing: Text('€${currentPrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
       );
     });
   }
