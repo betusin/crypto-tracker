@@ -6,6 +6,8 @@ import 'package:crypto_tracker/transaction/widget/add_or_update_transaction_scre
 import 'package:crypto_tracker/portfolio/widget/dashboard_screen.dart';
 import 'package:crypto_tracker/transaction/widget/transaction_list.dart';
 import 'package:crypto_tracker/transaction_import/widget/transaction_import_button.dart';
+import 'package:crypto_tracker/expense/widget/expenses_screen.dart';
+import 'package:crypto_tracker/expense/widget/add_or_update_expense_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [DashboardScreen(), TransactionList()];
+  final List<Widget> _screens = [DashboardScreen(), TransactionList(), const ExpensesScreen()];
 
   void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
@@ -29,7 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
       title: 'Crypto Tracker',
       actions: _buildActions(),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _onAddTransaction(context),
+        onPressed: () {
+          if (_selectedIndex == 2) {
+            _onAddExpense(context);
+          } else {
+            _onAddTransaction(context);
+          }
+        },
         child: const Icon(Icons.add),
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
@@ -50,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
         BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Transactions'),
+        BottomNavigationBarItem(icon: Icon(Icons.receipt), label: 'Expenses'),
       ],
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
@@ -58,4 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<dynamic> _onAddTransaction(BuildContext context) =>
       Navigator.push(context, MaterialPageRoute(builder: (context) => const AddOrUpdateTransactionScreen()));
+
+  Future<dynamic> _onAddExpense(BuildContext context) =>
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const AddOrUpdateExpenseScreen()));
 }

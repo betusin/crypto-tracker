@@ -2,8 +2,12 @@ import 'package:crypto_tracker/auth/service/auth_service.dart';
 import 'package:crypto_tracker/auth/service/signed_in_user_provider.dart';
 import 'package:crypto_tracker/common/service/refetch_service.dart';
 import 'package:crypto_tracker/currency/model/cryptocureny.dart';
+import 'package:crypto_tracker/currency/service/fiat_currency_service.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/database/util/collection_names.dart';
+import 'package:crypto_tracker/expense/model/expense.dart';
+import 'package:crypto_tracker/expense/model/expense_category.dart';
+import 'package:crypto_tracker/expense/service/expense_service.dart';
 import 'package:crypto_tracker/price/service/current_price_controller.dart';
 import 'package:crypto_tracker/price/service/price_service.dart';
 import 'package:crypto_tracker/transaction/model/transaction_model.dart';
@@ -36,5 +40,18 @@ class IocContainer {
     );
     getIt.registerSingleton(CurrentPriceController(getIt<Refetcher<Map<Cryptocurrency, double>>>()));
     getIt.registerSingleton(HoldingService(getIt<TransactionService>(), getIt<CurrentPriceController>()));
+
+    getIt.registerSingleton(FiatCurrencyService());
+    getIt.registerSingleton(FirestoreRepository<Expense>(CollectionNames.expenses, Expense.fromJson));
+    getIt.registerSingleton(
+      FirestoreRepository<ExpenseCategory>(CollectionNames.expenseCategories, ExpenseCategory.fromJson),
+    );
+    getIt.registerSingleton(
+      ExpenseService(
+        getIt<SignedInUserProvider>(),
+        getIt<FirestoreRepository<Expense>>(),
+        getIt<FirestoreRepository<ExpenseCategory>>(),
+      ),
+    );
   }
 }
