@@ -5,6 +5,8 @@ import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/expense/model/expense.dart';
 import 'package:crypto_tracker/expense/model/expense_category.dart';
 import 'package:crypto_tracker/expense/service/expense_service.dart';
+import 'package:crypto_tracker/expense/widget/category_icon_picker.dart';
+import 'package:crypto_tracker/expense/widget/category_picker_dialog.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -103,30 +105,74 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
 
   Future<void> _addCategory() async {
     final catController = TextEditingController();
-    final name = await showDialog<String>(
+    int selectedIcon = 0xe148; // Icons.category.codePoint
+
+    final result = await showDialog<ExpenseCategory>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('New Category'),
-        content: TextField(
-          controller: catController,
-          decoration: const InputDecoration(labelText: 'Category Name'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('New Category'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: catController,
+                  decoration: const InputDecoration(labelText: 'Category Name', hintText: 'e.g. Entertainment'),
+                  textCapitalization: TextCapitalization.words,
+                ),
+                const SizedBox(height: 20),
+                const Text('Pick an Icon', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                CategoryIconPicker(
+                  selectedIconCodePoint: selectedIcon,
+                  onIconSelected: (code) => setDialogState(() => selectedIcon = code),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                if (catController.text.isNotEmpty) {
+                  Navigator.pop(
+                    context,
+                    ExpenseCategory(
+                      id: const Uuid().v4(),
+                      userId: _signedInUserProvider.currentUser!.uid,
+                      name: catController.text,
+                      iconCodePoint: selectedIcon,
+                      isCustom: true,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, catController.text), child: const Text('Add')),
-        ],
       ),
     );
 
-    if (name != null && name.isNotEmpty) {
-      final newCat = ExpenseCategory(
-        id: const Uuid().v4(),
-        userId: _signedInUserProvider.currentUser!.uid,
-        name: name,
-        isCustom: true,
-      );
-      await _categoryRepo.add(newCat);
-      setState(() => _selectedCategoryId = newCat.id);
+    if (result != null) {
+      await _categoryRepo.add(result);
+      setState(() => _selectedCategoryId = result.id);
+    }
+  }
+
+  void _showCategoryPicker(List<ExpenseCategory> categories) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => CategoryPickerDialog(
+        categories: categories,
+        selectedCategoryId: _selectedCategoryId,
+        onAddCategory: _addCategory,
+      ),
+    );
+
+    if (result != null) {
+      setState(() => _selectedCategoryId = result);
     }
   }
 
@@ -173,24 +219,63 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
                       stream: _expenseService.observeCategoriesForCurrentUser(),
                       builder: (context, snapshot) {
                         final categories = snapshot.data ?? [];
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: DropdownButtonFormField<String>(
-                                value: _selectedCategoryId,
-                                hint: const Text('Select Category'),
-                                items: categories.map((c) {
-                                  return DropdownMenuItem(value: c.id, child: Text(c.name));
-                                }).toList(),
-                                onChanged: (v) => setState(() => _selectedCategoryId = v),
-                              ),
+                        final selectedCategory = categories.firstWhere(
+                          (c) => c.id == _selectedCategoryId,
+                          orElse: () => ExpenseCategory(
+                            id: '',
+                            userId: '',
+                            name: 'Select Category',
+                            iconCodePoint: 0xe148, // Icons.category
+                          ),
+                        );
+
+                        return InkWell(
+                          onTap: () => _showCategoryPicker(categories),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.withAlpha(150)),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: _addCategory,
-                              tooltip: 'Add new category',
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.primaryContainer.withAlpha(100),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(
+                                    IconData(selectedCategory.iconCodePoint, fontFamily: 'MaterialIcons'),
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Category',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                              color: Theme.of(context).colorScheme.secondary,
+                                            ),
+                                      ),
+                                      Text(
+                                        selectedCategory.name,
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                              fontWeight:
+                                                  _selectedCategoryId != null ? FontWeight.bold : FontWeight.normal,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_drop_down),
+                              ],
                             ),
-                          ],
+                          ),
                         );
                       },
                     ),

@@ -29,23 +29,28 @@ class ExpenseService {
         .get();
 
     if (snapshot.docs.isEmpty) {
-      final defaultCategories = [
-        'Food',
-        'Dining Out',
-        'Transportation',
-        'Household',
-        'Healthcare',
-        'Social Life',
-        'Shopping',
-        'Sport',
-        'Other',
-      ];
+      final defaultCategories = {
+        'Food': 0xe390, // lunch_dining
+        'Dining Out': 0xe56c, // restaurant
+        'Transportation': 0xe1d7, // directions_car
+        'Household': 0xe318, // home
+        'Healthcare': 0xf10d, // medical_services
+        'Social Life': 0xf07a, // groups
+        'Shopping': 0xf37d, // shopping_bag
+        'Sport': 0xe281, // fitness_center
+        'Other': 0xe148, // category
+      };
 
-      // TODO(betka): could probably extract the batch logic to generic service
       final batch = FirebaseFirestore.instance.batch();
-      for (final name in defaultCategories) {
+      for (final entry in defaultCategories.entries) {
         final docRef = FirebaseFirestore.instance.collection('expense_categories').doc();
-        batch.set(docRef, {'id': docRef.id, 'userId': _userId, 'name': name, 'isCustom': false});
+        batch.set(docRef, {
+          'id': docRef.id,
+          'userId': _userId,
+          'name': entry.key,
+          'isCustom': false,
+          'iconCodePoint': entry.value,
+        });
       }
       await batch.commit();
     }

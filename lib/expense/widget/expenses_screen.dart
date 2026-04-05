@@ -2,10 +2,13 @@ import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/expense/model/expense.dart';
+import 'package:crypto_tracker/expense/model/expense_category.dart';
 import 'package:crypto_tracker/expense/service/expense_service.dart';
 import 'package:crypto_tracker/expense/widget/add_or_update_expense_screen.dart';
+import 'package:crypto_tracker/expense/widget/category_picker_dialog.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ExpensesScreen extends StatefulWidget {
   const ExpensesScreen({super.key});
@@ -49,10 +52,17 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           ),
           SMALL_GAP,
           Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _pickCategory,
-              icon: const Icon(Icons.category),
-              label: Text(_selectedCategoryId == null ? 'All Categories' : 'Filtered'),
+            child: StreamBuilder<List<ExpenseCategory>>(
+              stream: _expenseService.observeCategoriesForCurrentUser(),
+              builder: (context, snapshot) {
+                final categories = snapshot.data ?? [];
+                
+                return OutlinedButton.icon(
+                  onPressed: () => _pickCategory(categories),
+                  icon: const Icon(Icons.category),
+                  label: Text(_selectedCategoryId == null ? 'All Categories' : 'Filtered'),
+                );
+              }
             ),
           ),
           if (_selectedDate != null || _selectedCategoryId != null) ...[
@@ -82,18 +92,36 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     }
   }
 
-  Future<void> _pickCategory() async {
-    // A simple dialog to clear category or select from a list.
-    // For simplicity, we just clear it or let the user know they can add one.
-    // In a full implementation, you'd show a list of categories here.
-    setState(() => _selectedCategoryId = null);
+  Future<void> _pickCategory(List<ExpenseCategory> categories) async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => CategoryPickerDialog(
+        categories: categories,
+        selectedCategoryId: _selectedCategoryId,
+        onAddCategory: () {
+          Navigator.pop(context);
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddOrUpdateExpenseScreen()));
+        },
+      ),
+    );
+
+    if (result != null) {
+      setState(() => _selectedCategoryId = result);
+    }
   }
 
   Widget _buildExpenseList() {
-    return HandlingStreamBuilder<List<Expense>>(
-      stream: _expenseService.observeExpensesForCurrentUser(),
-      builder: (context, expenses) {
-        // TODO(betka): move filtering to service
+    return HandlingStreamBuilder<Map<String, dynamic>>(
+      stream: Rx.combineLatest2(
+        _expenseService.observeExpensesForCurrentUser(),
+        _expenseService.observeCategoriesForCurrentUser(),
+        (expenses, categories) => {'expenses': expenses, 'categories': categories},
+      ),
+      builder: (context, data) {
+        List<Expense> expenses = data['expenses'] as List<Expense>;
+        final categories = data['categories'] as List<ExpenseCategory>;
+        final categoryMap = {for (var c in categories) c.id: c};
+
         // Apply filters
         if (_selectedDate != null) {
           expenses = expenses
@@ -119,13 +147,25 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           itemCount: expenses.length,
           itemBuilder: (context, index) {
             final expense = expenses[index];
+            final category = categoryMap[expense.categoryId];
+
             return ListTile(
               onTap: () => _onEditExpense(expense),
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                child: Icon(
+                  category != null ? IconData(category.iconCodePoint, fontFamily: 'MaterialIcons') : Icons.category,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
               title: Text(expense.title),
-              subtitle: Text('${expense.date.day}.${expense.date.month}.${expense.date.year}'),
+              subtitle: Text(
+                '${category?.name ?? "Unknown"} • ${_selectedDate == null ? "${expense.date.day}.${expense.date.month}.${expense.date.year}" : ""}',
+              ),
               trailing: Text(
                 '${expense.amount.toStringAsFixed(2)} ${expense.currency.displayName}\n(≈ ${expense.amountInCzk.toStringAsFixed(2)} CZK)',
                 textAlign: TextAlign.end,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               onLongPress: () => _expenseRepository.delete(expense.id),
             );

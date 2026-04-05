@@ -12,6 +12,7 @@ ExpenseCategory _$ExpenseCategoryFromJson(Map<String, dynamic> json) =>
       userId: json['userId'] as String,
       name: json['name'] as String,
       isCustom: json['isCustom'] as bool? ?? true,
+      iconCodePoint: (json['iconCodePoint'] as num?)?.toInt() ?? 0xe148,
     );
 
 Map<String, dynamic> _$ExpenseCategoryToJson(ExpenseCategory instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$ExpenseCategoryToJson(ExpenseCategory instance) =>
       'userId': instance.userId,
       'name': instance.name,
       'isCustom': instance.isCustom,
+      'iconCodePoint': instance.iconCodePoint,
     };
