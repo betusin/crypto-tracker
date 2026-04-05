@@ -8,14 +8,14 @@ class ExpenseCategory extends IdentifiableSerializableBase {
   final String userId;
   final String name;
   final bool isCustom;
-  final int iconCodePoint;
+  final String iconName;
 
   ExpenseCategory({
     required super.id,
     required this.userId,
     required this.name,
     this.isCustom = true,
-    this.iconCodePoint = 0xe148, // Icons.category.codePoint
+    this.iconName = 'category',
   });
 
   @override

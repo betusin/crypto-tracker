@@ -30,15 +30,15 @@ class ExpenseService {
 
     if (snapshot.docs.isEmpty) {
       final defaultCategories = {
-        'Food': 0xe390, // lunch_dining
-        'Dining Out': 0xe56c, // restaurant
-        'Transportation': 0xe1d7, // directions_car
-        'Household': 0xe318, // home
-        'Healthcare': 0xf10d, // medical_services
-        'Social Life': 0xf07a, // groups
-        'Shopping': 0xf37d, // shopping_bag
-        'Sport': 0xe281, // fitness_center
-        'Other': 0xe148, // category
+        'Food': 'lunch_dining',
+        'Dining Out': 'restaurant',
+        'Transportation': 'directions_car',
+        'Household': 'home',
+        'Healthcare': 'local_hospital',
+        'Social Life': 'nightlife',
+        'Shopping': 'shopping_bag',
+        'Sport': 'fitness_center',
+        'Other': 'category',
       };
 
       final batch = FirebaseFirestore.instance.batch();
@@ -49,7 +49,7 @@ class ExpenseService {
           'userId': _userId,
           'name': entry.key,
           'isCustom': false,
-          'iconCodePoint': entry.value,
+          'iconName': entry.value,
         });
       }
       await batch.commit();

@@ -7,6 +7,7 @@ import 'package:crypto_tracker/expense/model/expense_category.dart';
 import 'package:crypto_tracker/expense/service/expense_service.dart';
 import 'package:crypto_tracker/expense/widget/category_icon_picker.dart';
 import 'package:crypto_tracker/expense/widget/category_picker_dialog.dart';
+import 'package:crypto_tracker/expense/service/category_icon_mapper.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
@@ -105,7 +106,7 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
 
   Future<void> _addCategory() async {
     final catController = TextEditingController();
-    int selectedIcon = 0xe148; // Icons.category.codePoint
+    String selectedIcon = 'category';
 
     final result = await showDialog<ExpenseCategory>(
       context: context,
@@ -125,8 +126,8 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
                 const Text('Pick an Icon', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 CategoryIconPicker(
-                  selectedIconCodePoint: selectedIcon,
-                  onIconSelected: (code) => setDialogState(() => selectedIcon = code),
+                  selectedIconName: selectedIcon,
+                  onIconSelected: (name) => setDialogState(() => selectedIcon = name),
                 ),
               ],
             ),
@@ -142,7 +143,7 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
                       id: const Uuid().v4(),
                       userId: _signedInUserProvider.currentUser!.uid,
                       name: catController.text,
-                      iconCodePoint: selectedIcon,
+                      iconName: selectedIcon,
                       isCustom: true,
                     ),
                   );
@@ -161,6 +162,64 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
     }
   }
 
+  void _onEditCategory(ExpenseCategory category) async {
+    final catController = TextEditingController(text: category.name);
+    String selectedIcon = category.iconName;
+
+    final result = await showDialog<ExpenseCategory>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Edit Category'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: catController,
+                  decoration: const InputDecoration(labelText: 'Category Name'),
+                  textCapitalization: TextCapitalization.words,
+                ),
+                const SizedBox(height: 20),
+                const Text('Pick an Icon', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                CategoryIconPicker(
+                  selectedIconName: selectedIcon,
+                  onIconSelected: (name) => setDialogState(() => selectedIcon = name),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                if (catController.text.isNotEmpty) {
+                  Navigator.pop(
+                    context,
+                    ExpenseCategory(
+                      id: category.id,
+                      userId: category.userId,
+                      name: catController.text,
+                      iconName: selectedIcon,
+                      isCustom: category.isCustom,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result != null) {
+      await _categoryRepo.update(result.id, result.toJson());
+      if (mounted) setState(() {}); // Refresh categories (implicit via StreamBuilder)
+    }
+  }
+
   void _showCategoryPicker(List<ExpenseCategory> categories) async {
     final result = await showDialog<String>(
       context: context,
@@ -168,6 +227,7 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
         categories: categories,
         selectedCategoryId: _selectedCategoryId,
         onAddCategory: _addCategory,
+        onEditCategory: _onEditCategory,
       ),
     );
 
@@ -221,14 +281,11 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
                         final categories = snapshot.data ?? [];
                         final selectedCategory = categories.firstWhere(
                           (c) => c.id == _selectedCategoryId,
-                          orElse: () => ExpenseCategory(
-                            id: '',
-                            userId: '',
-                            name: 'Select Category',
-                            iconCodePoint: 0xe148, // Icons.category
-                          ),
+                          orElse: () =>
+                              ExpenseCategory(id: '', userId: '', name: 'Select Category', iconName: 'category'),
                         );
 
+                        final theme = Theme.of(context);
                         return InkWell(
                           onTap: () => _showCategoryPicker(categories),
                           borderRadius: BorderRadius.circular(12),
@@ -243,12 +300,12 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primaryContainer.withAlpha(100),
+                                    color: theme.colorScheme.primaryContainer.withAlpha(100),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Icon(
-                                    IconData(selectedCategory.iconCodePoint, fontFamily: 'MaterialIcons'),
-                                    color: Theme.of(context).colorScheme.primary,
+                                    CategoryIconMapper.getIcon(selectedCategory.iconName),
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -258,16 +315,13 @@ class _AddOrUpdateExpenseScreenState extends State<AddOrUpdateExpenseScreen> {
                                     children: [
                                       Text(
                                         'Category',
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: Theme.of(context).colorScheme.secondary,
-                                            ),
+                                        style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.secondary),
                                       ),
                                       Text(
                                         selectedCategory.name,
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                              fontWeight:
-                                                  _selectedCategoryId != null ? FontWeight.bold : FontWeight.normal,
-                                            ),
+                                        style: theme.textTheme.bodyLarge?.copyWith(
+                                          fontWeight: _selectedCategoryId != null ? FontWeight.bold : FontWeight.normal,
+                                        ),
                                       ),
                                     ],
                                   ),

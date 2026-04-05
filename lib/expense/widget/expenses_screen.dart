@@ -3,6 +3,7 @@ import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/expense/model/expense.dart';
 import 'package:crypto_tracker/expense/model/expense_category.dart';
+import 'package:crypto_tracker/expense/service/category_icon_mapper.dart';
 import 'package:crypto_tracker/expense/service/expense_service.dart';
 import 'package:crypto_tracker/expense/widget/add_or_update_expense_screen.dart';
 import 'package:crypto_tracker/expense/widget/category_picker_dialog.dart';
@@ -154,7 +155,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               leading: CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                 child: Icon(
-                  category != null ? IconData(category.iconCodePoint, fontFamily: 'MaterialIcons') : Icons.category,
+                  CategoryIconMapper.getIcon(category?.iconName ?? 'category'),
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
