@@ -3,6 +3,7 @@ import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/expense/model/expense.dart';
 import 'package:crypto_tracker/expense/service/expense_service.dart';
+import 'package:crypto_tracker/expense/widget/add_or_update_expense_screen.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
 
@@ -119,6 +120,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           itemBuilder: (context, index) {
             final expense = expenses[index];
             return ListTile(
+              onTap: () => _onEditExpense(expense),
               title: Text(expense.title),
               subtitle: Text('${expense.date.day}.${expense.date.month}.${expense.date.year}'),
               trailing: Text(
@@ -131,5 +133,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         );
       },
     );
+  }
+
+  void _onEditExpense(Expense expense) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => AddOrUpdateExpenseScreen(expense: expense)));
   }
 }
