@@ -7,8 +7,9 @@ class AppRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Crypto Tracker',
-      theme: ThemeData(colorSchemeSeed: Colors.amber),
+      theme: ThemeData(colorSchemeSeed: Colors.amber, brightness: Brightness.dark),
       home: AuthWrapper(),
     );
   }
