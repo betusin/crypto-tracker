@@ -212,6 +212,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           );
         }
 
+        listItems.add(STANDARD_GAP);
+        listItems.add(STANDARD_GAP);
+        listItems.add(STANDARD_GAP);
+        listItems.add(STANDARD_GAP);
+
         return Column(
           children: [
             totalWidget,

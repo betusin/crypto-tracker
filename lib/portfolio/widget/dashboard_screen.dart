@@ -54,6 +54,8 @@ class DashboardScreen extends StatelessWidget {
         const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         SMALL_GAP,
         ..._buildHoldingsList(data),
+        STANDARD_GAP,
+        STANDARD_GAP,
       ],
     );
   }

@@ -64,10 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: STANDARD_GAP_SIZE * 4),
-        child: _screens[_selectedIndex],
-      ),
+      child: _screens[_selectedIndex],
     );
   }
 

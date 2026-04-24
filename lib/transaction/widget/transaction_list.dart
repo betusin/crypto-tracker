@@ -1,3 +1,4 @@
+import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 import 'package:crypto_tracker/common/extension/string_extension.dart';
 import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/database/service/firestore_repository.dart';
@@ -24,12 +25,21 @@ class TransactionList extends StatelessWidget {
           return const Center(child: Text('No transactions yet.'));
         }
 
-        return ListView.builder(
-          itemCount: transactions.length,
-          itemBuilder: (context, index) {
-            final transaction = transactions[index];
-            return _buildDismissibleItem(context, transaction);
-          },
+        return Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: transactions.length + 4,
+                itemBuilder: (context, index) {
+                  if (index >= transactions.length) {
+                    return STANDARD_GAP;
+                  }
+                  final transaction = transactions[index];
+                  return _buildDismissibleItem(context, transaction);
+                },
+              ),
+            ),
+          ],
         );
       },
     );
