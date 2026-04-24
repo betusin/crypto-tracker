@@ -23,7 +23,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   final _expenseService = getIt<ExpenseService>();
   final _expenseRepository = getIt<FirestoreRepository<Expense>>();
 
-  DateTime? _selectedDate;
+  DateTimeRange? _selectedDateRange;
   String? _selectedCategoryId;
 
   @override
@@ -46,9 +46,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               onPressed: _pickDate,
               icon: const Icon(Icons.calendar_month),
               label: Text(
-                _selectedDate == null
+                _selectedDateRange == null
                     ? 'All Dates'
-                    : '${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}',
+                    : '${_selectedDateRange!.start.day}.${_selectedDateRange!.start.month}. - ${_selectedDateRange!.end.day}.${_selectedDateRange!.end.month}.',
               ),
             ),
           ),
@@ -67,12 +67,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               },
             ),
           ),
-          if (_selectedDate != null || _selectedCategoryId != null) ...[
+          if (_selectedDateRange != null || _selectedCategoryId != null) ...[
             SMALL_GAP,
             IconButton(
               icon: const Icon(Icons.clear),
               onPressed: () => setState(() {
-                _selectedDate = null;
+                _selectedDateRange = null;
                 _selectedCategoryId = null;
               }),
             ),
@@ -83,14 +83,14 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Future<void> _pickDate() async {
-    final date = await showDatePicker(
+    final range = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDateRange: _selectedDateRange,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
-    if (date != null) {
-      setState(() => _selectedDate = date);
+    if (range != null) {
+      setState(() => _selectedDateRange = range);
     }
   }
 
@@ -125,15 +125,16 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         final categoryMap = {for (var c in categories) c.id: c};
 
         // Apply filters
-        if (_selectedDate != null) {
-          expenses = expenses
-              .where(
-                (e) =>
-                    e.date.year == _selectedDate!.year &&
-                    e.date.month == _selectedDate!.month &&
-                    e.date.day == _selectedDate!.day,
-              )
-              .toList();
+        if (_selectedDateRange != null) {
+          final start = _selectedDateRange!.start;
+          final end = _selectedDateRange!.end;
+          final startDay = DateTime(start.year, start.month, start.day);
+          final endDay = DateTime(end.year, end.month, end.day, 23, 59, 59);
+
+          expenses = expenses.where((e) {
+            return e.date.isAfter(startDay.subtract(const Duration(seconds: 1))) &&
+                e.date.isBefore(endDay.add(const Duration(seconds: 1)));
+          }).toList();
         }
         if (_selectedCategoryId != null) {
           expenses = expenses.where((e) => e.categoryId == _selectedCategoryId).toList();
