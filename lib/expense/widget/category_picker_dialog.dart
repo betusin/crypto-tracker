@@ -2,9 +2,11 @@ import 'package:crypto_tracker/expense/model/expense_category.dart';
 import 'package:crypto_tracker/expense/widget/category_item.dart';
 import 'package:flutter/material.dart';
 
-class CategoryPickerDialog extends StatelessWidget {
+class CategoryPickerDialog extends StatefulWidget {
   final List<ExpenseCategory> categories;
   final String? selectedCategoryId;
+  final Set<String>? selectedCategoryIds;
+  final bool multiSelect;
   final VoidCallback onAddCategory;
   final ValueChanged<ExpenseCategory>? onEditCategory;
 
@@ -12,9 +14,42 @@ class CategoryPickerDialog extends StatelessWidget {
     super.key,
     required this.categories,
     this.selectedCategoryId,
+    this.selectedCategoryIds,
+    this.multiSelect = false,
     required this.onAddCategory,
     this.onEditCategory,
   });
+
+  @override
+  State<CategoryPickerDialog> createState() => _CategoryPickerDialogState();
+}
+
+class _CategoryPickerDialogState extends State<CategoryPickerDialog> {
+  late Set<String> _currentSelection;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.multiSelect) {
+      _currentSelection = Set.from(widget.selectedCategoryIds ?? {});
+    } else {
+      _currentSelection = widget.selectedCategoryId != null ? {widget.selectedCategoryId!} : {};
+    }
+  }
+
+  void _toggleCategory(String id) {
+    if (widget.multiSelect) {
+      setState(() {
+        if (_currentSelection.contains(id)) {
+          _currentSelection.remove(id);
+        } else {
+          _currentSelection.add(id);
+        }
+      });
+    } else {
+      Navigator.pop(context, id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +79,7 @@ class CategoryPickerDialog extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    onAddCategory();
+                    widget.onAddCategory();
                   },
                   icon: const Icon(Icons.add_circle_outline),
                   color: theme.colorScheme.primary,
@@ -55,7 +90,23 @@ class CategoryPickerDialog extends StatelessWidget {
             const SizedBox(height: 20),
             Flexible(child: SingleChildScrollView(child: _buildCategoryWrap(context))),
             const SizedBox(height: 20),
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+            if (widget.multiSelect)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, _currentSelection),
+                    child: const Text('Apply'),
+                  ),
+                ],
+              )
+            else
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+              ),
           ],
         ),
       ),
@@ -74,16 +125,16 @@ class CategoryPickerDialog extends StatelessWidget {
           spacing: spacing,
           runSpacing: 16,
           alignment: WrapAlignment.start,
-          children: categories.map((category) {
-            final isSelected = category.id == selectedCategoryId;
+          children: widget.categories.map((category) {
+            final isSelected = _currentSelection.contains(category.id);
             return CategoryItem(
               category: category,
               isSelected: isSelected,
-              onTap: () => Navigator.pop(context, category.id),
-              onLongPress: onEditCategory != null
+              onTap: () => _toggleCategory(category.id),
+              onLongPress: widget.onEditCategory != null
                   ? () {
                       Navigator.pop(context); // Close the picker
-                      onEditCategory!(category);
+                      widget.onEditCategory!(category);
                     }
                   : null,
               itemWidth: calculatedWidth,

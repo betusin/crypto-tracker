@@ -40,10 +40,7 @@ class CategoryItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected ? colorScheme.primaryContainer.withAlpha(50) : null,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? colorScheme.primary : Colors.grey.withAlpha(80),
-              width: isSelected ? 2 : 1,
-            ),
+            border: Border.all(color: isSelected ? colorScheme.primary : Colors.grey.withAlpha(80), width: 1),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

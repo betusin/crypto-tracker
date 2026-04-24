@@ -24,7 +24,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   final _expenseRepository = getIt<FirestoreRepository<Expense>>();
 
   DateTimeRange? _selectedDateRange;
-  String? _selectedCategoryId;
+  Set<String> _selectedCategoryIds = {};
 
   @override
   Widget build(BuildContext context) {
@@ -62,18 +62,20 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 return OutlinedButton.icon(
                   onPressed: () => _pickCategory(categories),
                   icon: const Icon(Icons.category),
-                  label: Text(_selectedCategoryId == null ? 'All Categories' : 'Filtered'),
+                  label: Text(
+                    _selectedCategoryIds.isEmpty ? 'All Categories' : 'Filtered (${_selectedCategoryIds.length})',
+                  ),
                 );
               },
             ),
           ),
-          if (_selectedDateRange != null || _selectedCategoryId != null) ...[
+          if (_selectedDateRange != null || _selectedCategoryIds.isNotEmpty) ...[
             SMALL_GAP,
             IconButton(
               icon: const Icon(Icons.clear),
               onPressed: () => setState(() {
                 _selectedDateRange = null;
-                _selectedCategoryId = null;
+                _selectedCategoryIds.clear();
               }),
             ),
           ],
@@ -95,11 +97,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Future<void> _pickCategory(List<ExpenseCategory> categories) async {
-    final result = await showDialog<String>(
+    final result = await showDialog<Set<String>>(
       context: context,
       builder: (context) => CategoryPickerDialog(
         categories: categories,
-        selectedCategoryId: _selectedCategoryId,
+        selectedCategoryIds: _selectedCategoryIds,
+        multiSelect: true,
         onAddCategory: () {
           Navigator.pop(context);
           Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddOrUpdateExpenseScreen()));
@@ -108,7 +111,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
 
     if (result != null) {
-      setState(() => _selectedCategoryId = result);
+      setState(() => _selectedCategoryIds = result);
     }
   }
 
@@ -136,8 +139,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 e.date.isBefore(endDay.add(const Duration(seconds: 1)));
           }).toList();
         }
-        if (_selectedCategoryId != null) {
-          expenses = expenses.where((e) => e.categoryId == _selectedCategoryId).toList();
+        if (_selectedCategoryIds.isNotEmpty) {
+          expenses = expenses.where((e) => _selectedCategoryIds.contains(e.categoryId)).toList();
         }
 
         expenses.sort((a, b) => b.date.compareTo(a.date));
