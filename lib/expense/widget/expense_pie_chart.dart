@@ -11,10 +11,12 @@ class ExpensePieChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (categorizedExpenses.isEmpty) {
-      return const Center(child: Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Text('No expenses in the last 30 days', style: TextStyle(color: Colors.grey)),
-      ));
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Text('No expenses in the last 30 days', style: TextStyle(color: Colors.grey)),
+        ),
+      );
     }
 
     final total = categorizedExpenses.values.fold(0.0, (sum, val) => sum + val);
@@ -54,11 +56,7 @@ class ExpensePieChart extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
           ),
-          child: Icon(
-            CategoryIconMapper.getIcon(category.iconName),
-            size: 16,
-            color: colors[idx % colors.length],
-          ),
+          child: Icon(CategoryIconMapper.getIcon(category.iconName), size: 16, color: colors[idx % colors.length]),
         ),
         badgePositionPercentageOffset: 1.1,
       );
@@ -66,10 +64,7 @@ class ExpensePieChart extends StatelessWidget {
 
     return Column(
       children: [
-        const Text(
-          'Spending by Category (30d)',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text('Spending by Category', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 20),
         SizedBox(
           height: 200,
@@ -99,16 +94,10 @@ class ExpensePieChart extends StatelessWidget {
                 Container(
                   width: 12,
                   height: 12,
-                  decoration: BoxDecoration(
-                    color: colors[idx % colors.length],
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: colors[idx % colors.length], shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  '${category.name}: €${value.toStringAsFixed(0)}',
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text('${category.name}: ${value.toStringAsFixed(0)}', style: theme.textTheme.bodySmall),
               ],
             );
           }).toList(),

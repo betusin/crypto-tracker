@@ -36,6 +36,13 @@ class DashboardScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
+        HandlingStreamBuilder<Map<ExpenseCategory, double>>(
+          stream: _expenseService.observeCategorizedExpensesForLast30Days(),
+          builder: (context, grouped) => ExpensePieChart(categorizedExpenses: grouped),
+        ),
+        MEDIUM_GAP,
+        const Divider(),
+        MEDIUM_GAP,
         SummaryCard(title: 'Total Portfolio Value', value: '€${data.totalPortfolioValue.toStringAsFixed(2)}'),
         STANDARD_GAP,
         SummaryCard(
@@ -47,14 +54,6 @@ class DashboardScreen extends StatelessWidget {
         const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         SMALL_GAP,
         ..._buildHoldingsList(data),
-        MEDIUM_GAP,
-        const Divider(),
-        MEDIUM_GAP,
-        HandlingStreamBuilder<Map<ExpenseCategory, double>>(
-          stream: _expenseService.observeCategorizedExpensesForLast30Days(),
-          builder: (context, grouped) => ExpensePieChart(categorizedExpenses: grouped),
-        ),
-        const SizedBox(height: 40),
       ],
     );
   }

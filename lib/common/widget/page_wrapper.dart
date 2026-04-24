@@ -5,6 +5,7 @@ class PageWrapper extends StatelessWidget {
   final String? title;
   final Widget? bottomNavigationBar;
   final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
   final List<Widget>? actions;
 
   const PageWrapper({
@@ -13,6 +14,7 @@ class PageWrapper extends StatelessWidget {
     this.title,
     this.bottomNavigationBar,
     this.floatingActionButton,
+    this.floatingActionButtonLocation,
     this.actions,
   });
 
@@ -23,6 +25,7 @@ class PageWrapper extends StatelessWidget {
       body: SafeArea(child: child),
       bottomNavigationBar: bottomNavigationBar,
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
     );
   }
 }

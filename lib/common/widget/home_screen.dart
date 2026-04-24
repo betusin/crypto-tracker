@@ -8,6 +8,7 @@ import 'package:crypto_tracker/transaction/widget/transaction_list.dart';
 import 'package:crypto_tracker/transaction_import/widget/transaction_import_button.dart';
 import 'package:crypto_tracker/expense/widget/expenses_screen.dart';
 import 'package:crypto_tracker/expense/widget/add_or_update_expense_screen.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _authService = getIt<AuthService>();
 
   int _selectedIndex = 0;
+  final _key = GlobalKey<ExpandableFabState>();
 
   final List<Widget> _screens = [DashboardScreen(), TransactionList(), const ExpensesScreen()];
 
@@ -30,15 +32,35 @@ class _HomeScreenState extends State<HomeScreen> {
     return PageWrapper(
       title: 'Crypto Tracker',
       actions: _buildActions(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_selectedIndex == 2) {
-            _onAddExpense(context);
-          } else {
-            _onAddTransaction(context);
-          }
-        },
-        child: const Icon(Icons.add),
+      floatingActionButtonLocation: ExpandableFab.location,
+      floatingActionButton: ExpandableFab(
+        key: _key,
+        type: ExpandableFabType.fan,
+        openButtonBuilder: RotateFloatingActionButtonBuilder(child: const Icon(Icons.add)),
+        children: [
+          FloatingActionButton.large(
+            heroTag: null,
+            child: const Icon(Icons.currency_exchange),
+            onPressed: () {
+              final state = _key.currentState;
+              if (state != null) {
+                state.toggle();
+              }
+              _onAddTransaction(context);
+            },
+          ),
+          FloatingActionButton.large(
+            heroTag: null,
+            child: const Icon(Icons.receipt),
+            onPressed: () {
+              final state = _key.currentState;
+              if (state != null) {
+                state.toggle();
+              }
+              _onAddExpense(context);
+            },
+          ),
+        ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
       child: _screens[_selectedIndex],
