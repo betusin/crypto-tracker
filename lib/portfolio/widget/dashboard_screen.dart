@@ -7,10 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:crypto_tracker/portfolio/service/holding_service.dart';
 import 'package:crypto_tracker/common/widget/summary_card.dart';
 import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
+import 'package:crypto_tracker/expense/service/expense_service.dart';
+import 'package:crypto_tracker/expense/widget/expense_pie_chart.dart';
+import 'package:crypto_tracker/expense/model/expense_category.dart';
 
 class DashboardScreen extends StatelessWidget {
   final _holdingService = getIt<HoldingService>();
   final _currentPriceController = getIt<CurrentPriceController>();
+  final _expenseService = getIt<ExpenseService>();
 
   DashboardScreen({super.key});
 
@@ -39,11 +43,18 @@ class DashboardScreen extends StatelessWidget {
           value: '${isProfitPositive ? "+" : ""} €${data.totalProfit.toStringAsFixed(2)}',
           valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
         ),
-        // TODO(betka): maybe display current prices of cryptocurrencies - maybe selector for which crypto to display
         MEDIUM_GAP,
         const Text('Your Holdings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         SMALL_GAP,
         ..._buildHoldingsList(data),
+        MEDIUM_GAP,
+        const Divider(),
+        MEDIUM_GAP,
+        HandlingStreamBuilder<Map<ExpenseCategory, double>>(
+          stream: _expenseService.observeCategorizedExpensesForLast30Days(),
+          builder: (context, grouped) => ExpensePieChart(categorizedExpenses: grouped),
+        ),
+        const SizedBox(height: 40),
       ],
     );
   }

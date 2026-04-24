@@ -3,6 +3,7 @@ import 'package:crypto_tracker/database/service/firestore_repository.dart';
 import 'package:crypto_tracker/expense/model/expense.dart';
 import 'package:crypto_tracker/expense/model/expense_category.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ExpenseService {
   final SignedInUserProvider _signedInUserProvider;
@@ -15,6 +16,28 @@ class ExpenseService {
 
   Stream<List<Expense>> observeExpensesForCurrentUser() {
     return _expenseRepository.observeByQuery((query) => query.where('userId', isEqualTo: _userId));
+  }
+
+  Stream<Map<ExpenseCategory, double>> observeCategorizedExpensesForLast30Days() {
+    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+
+    return Rx.combineLatest2<List<Expense>, List<ExpenseCategory>, Map<ExpenseCategory, double>>(
+      _expenseRepository.observeByQuery((query) => query.where('userId', isEqualTo: _userId)),
+      observeCategoriesForCurrentUser(),
+      (expenses, categories) {
+        final recentExpenses = expenses.where((e) => e.date.isAfter(thirtyDaysAgo)).toList();
+        final categoryMap = {for (var c in categories) c.id: c};
+        final grouped = <ExpenseCategory, double>{};
+
+        for (var expense in recentExpenses) {
+          final category = categoryMap[expense.categoryId];
+          if (category != null) {
+            grouped[category] = (grouped[category] ?? 0) + expense.amountInCzk;
+          }
+        }
+        return grouped;
+      },
+    );
   }
 
   Stream<List<ExpenseCategory>> observeCategoriesForCurrentUser() {
