@@ -25,6 +25,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
   DateTimeRange? _selectedDateRange;
   Set<String> _selectedCategoryIds = {};
+  bool _isImporting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +70,15 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               },
             ),
           ),
+          SMALL_GAP,
+          IconButton(
+            onPressed: _isImporting ? null : _importCsv,
+            icon: _isImporting
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.file_upload),
+            tooltip: 'Import CSV',
+            color: Theme.of(context).colorScheme.primary,
+          ),
           if (_selectedDateRange != null || _selectedCategoryIds.isNotEmpty) ...[
             SMALL_GAP,
             IconButton(
@@ -93,6 +103,18 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     );
     if (range != null) {
       setState(() => _selectedDateRange = range);
+    }
+  }
+
+  Future<void> _importCsv() async {
+    setState(() => _isImporting = true);
+    final success = await _expenseService.importCsv();
+    setState(() => _isImporting = false);
+    
+    if (mounted && success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Expenses imported successfully!')),
+      );
     }
   }
 
