@@ -7,6 +7,7 @@ import 'package:crypto_tracker/expense/service/category_icon_mapper.dart';
 import 'package:crypto_tracker/expense/service/expense_service.dart';
 import 'package:crypto_tracker/expense/widget/add_or_update_expense_screen.dart';
 import 'package:crypto_tracker/expense/widget/category_picker_dialog.dart';
+import 'package:crypto_tracker/common/extension/num_extension.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -57,13 +58,13 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
               stream: _expenseService.observeCategoriesForCurrentUser(),
               builder: (context, snapshot) {
                 final categories = snapshot.data ?? [];
-                
+
                 return OutlinedButton.icon(
                   onPressed: () => _pickCategory(categories),
                   icon: const Icon(Icons.category),
                   label: Text(_selectedCategoryId == null ? 'All Categories' : 'Filtered'),
                 );
-              }
+              },
             ),
           ),
           if (_selectedDate != null || _selectedCategoryId != null) ...[
@@ -140,17 +141,53 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
         expenses.sort((a, b) => b.date.compareTo(a.date));
 
+        final totalSpent = expenses.fold(0.0, (sum, expense) => sum + expense.amountInCzk);
+
+        final totalWidget = Padding(
+          padding: const EdgeInsets.only(right: STANDARD_GAP_SIZE),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Total Spent: ${totalSpent.formatWithSpaces(0)} Kč',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+        );
+
         if (expenses.isEmpty) {
-          return const Center(child: Text('No expenses found.'));
+          return Column(
+            children: [
+              totalWidget,
+              const Expanded(child: Center(child: Text('No expenses found.'))),
+            ],
+          );
         }
 
-        return ListView.builder(
-          itemCount: expenses.length,
-          itemBuilder: (context, index) {
-            final expense = expenses[index];
-            final category = categoryMap[expense.categoryId];
+        final List<Widget> listItems = [];
+        DateTime? currentDate;
 
-            return ListTile(
+        for (final expense in expenses) {
+          final expenseDate = DateTime(expense.date.year, expense.date.month, expense.date.day);
+          if (currentDate != expenseDate) {
+            currentDate = expenseDate;
+            listItems.add(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(SMALL_GAP_SIZE, SMALL_GAP_SIZE, SMALL_GAP_SIZE, SMALL_GAP_SIZE / 2),
+                child: Text(
+                  '${currentDate.day}.${currentDate.month}.${currentDate.year}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final category = categoryMap[expense.categoryId];
+
+          listItems.add(
+            ListTile(
               onTap: () => _onEditExpense(expense),
               leading: CircleAvatar(
                 backgroundColor: Theme.of(context).colorScheme.primaryContainer,
@@ -160,17 +197,22 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 ),
               ),
               title: Text(expense.title),
-              subtitle: Text(
-                '${category?.name ?? "Unknown"} • ${_selectedDate == null ? "${expense.date.day}.${expense.date.month}.${expense.date.year}" : ""}',
-              ),
+              subtitle: Text(category?.name ?? "Unknown"),
               trailing: Text(
-                '${expense.amount.toStringAsFixed(2)} ${expense.currency.displayName}\n(≈ ${expense.amountInCzk.toStringAsFixed(2)} CZK)',
+                '${expense.amount.formatWithSpaces(2)} ${expense.currency.displayName}\n(≈ ${expense.amountInCzk.formatWithSpaces(2)} CZK)',
                 textAlign: TextAlign.end,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               onLongPress: () => _expenseRepository.delete(expense.id),
-            );
-          },
+            ),
+          );
+        }
+
+        return Column(
+          children: [
+            totalWidget,
+            Expanded(child: ListView(children: listItems)),
+          ],
         );
       },
     );

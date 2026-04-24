@@ -1,3 +1,4 @@
+import 'package:crypto_tracker/common/extension/num_extension.dart';
 import 'package:crypto_tracker/expense/model/expense_category.dart';
 import 'package:crypto_tracker/expense/service/category_icon_mapper.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -139,7 +140,7 @@ class _ExpensePieChartState extends State<ExpensePieChart> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '${entries[_touchedIndex!].value.toStringAsFixed(0)} Kč',
+                            '${entries[_touchedIndex!].value.formatWithSpaces(0)} Kč',
                             style: TextStyle(fontSize: 14, color: theme.colorScheme.surface.withOpacity(0.8)),
                           ),
                         ],

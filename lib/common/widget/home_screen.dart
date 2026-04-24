@@ -1,4 +1,5 @@
 import 'package:crypto_tracker/auth/service/auth_service.dart';
+import 'package:crypto_tracker/common/constants/shared_ui_constants.dart';
 import 'package:crypto_tracker/common/widget/page_wrapper.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
-      child: _screens[_selectedIndex],
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: STANDARD_GAP_SIZE * 4),
+        child: _screens[_selectedIndex],
+      ),
     );
   }
 

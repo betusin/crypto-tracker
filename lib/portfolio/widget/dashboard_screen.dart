@@ -1,3 +1,4 @@
+import 'package:crypto_tracker/common/extension/num_extension.dart';
 import 'package:crypto_tracker/common/extension/string_extension.dart';
 import 'package:crypto_tracker/common/widget/handling_stream_builder.dart';
 import 'package:crypto_tracker/ioc/ioc_container.dart';
@@ -42,11 +43,11 @@ class DashboardScreen extends StatelessWidget {
         ),
         SMALL_GAP,
         const Divider(),
-        SummaryCard(title: 'Total Portfolio Value', value: '€${data.totalPortfolioValue.toStringAsFixed(2)}'),
+        SummaryCard(title: 'Total Portfolio Value', value: '€${data.totalPortfolioValue.formatWithSpaces(2)}'),
         SMALL_GAP,
         SummaryCard(
           title: 'Total ${isProfitPositive ? 'Profit' : 'Loss'}',
-          value: '${isProfitPositive ? "+" : ""} €${data.totalProfit.toStringAsFixed(2)}',
+          value: '${isProfitPositive ? "+" : ""} €${data.totalProfit.formatWithSpaces(2)}',
           valueColor: isProfitPositive ? colorScheme.tertiary : colorScheme.error,
         ),
         SMALL_GAP,
@@ -69,8 +70,8 @@ class DashboardScreen extends StatelessWidget {
 
       return ListTile(
         title: Text(cryptoCurrency.value.capitalize()),
-        subtitle: Text('€${valueInEur.toStringAsFixed(2)} • ${amount.toStringAsFixed(4)} ${cryptoCurrency.symbol}'),
-        trailing: Text('€${currentPrice.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
+        subtitle: Text('€${valueInEur.formatWithSpaces(2)} • ${amount.formatWithSpaces(4)} ${cryptoCurrency.symbol}'),
+        trailing: Text('€${currentPrice.formatWithSpaces(2)}', style: const TextStyle(fontSize: 16)),
       );
     });
   }
